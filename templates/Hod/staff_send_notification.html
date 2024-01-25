@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="content container-fluid">
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h3 class="page-title">Список сотрудников</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'hod_home' %}">Панель управления</a></li>
+                    <li class="breadcrumb-item active">Список сотрудников</li>
+                </ul>
+            </div>
+            <div class="col-auto text-right float-right ml-auto">
+
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#sendnotifilcation">
+                    Все уведомления
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card card-table">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        {% include 'includes/messages.html' %}
+                        <table id="table_id" class="table table-hover table-center mb-0 ">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Ответственный</th>
+                                <th>Email</th>
+
+                                <th>Описание задачи</th>
+
+                                <!--                                <th>Плановая дата начала задачи</th>-->
+                                <!--                                <th>Плановая дата окончания задачи</th>-->
+
+                                <th>Фактическая дата начала задачи</th>
+                                <th>Фактическая дата окончания задачи</th>
+
+                                <th class="text-right">Статус задачи</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+
+                            {% for i in staff %}
+                            <tr>
+                                <td>{{i.id}}</td>
+                                <td>
+                                    <h2 class="table-avatar">
+                                        <a href="student-details.html" class="avatar avatar-sm mr-2"><img
+                                                class="avatar-img rounded-circle"
+                                                src="/{{i.admin.profile_pic}}" alt="User Image"></a>
+                                        <a href="student-details.html">{{i.admin.first_name}}&nbsp;{{i.admin.last_name}}</a>
+                                    </h2>
+                                </td>
+
+                                <td>{{i.admin.email}}</td>
+                                <td>{{i.admin.email}}</td>
+                                <td>{{i.admin.email}}</td>
+                                <td>{{i.admin.email}}</td>
+
+                                <td class="text-right">
+                                    <button type="button" class="btn btn-success" data-toggle="modal"
+                                            data-target="#staffsendnotification-{{fofloop.counter}}">
+                                        Назначить задачу
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+{% for i in staff %}
+<div class="modal fade" id="staffsendnotification-{{fofloop.counter}}" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalCenterTitle"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staffsendnotification1">Modal title {{i.admin.first_name}}&nbsp;{{i.admin.last_name}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'staff_save_notification' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="message">
+                        <input type="text" class="form-control" name="staff_id" value="{{i.admin.id}}" hidden>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% for i in staff %}
+<div class="modal fade" id="sendnotifilcation" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sendnotifilcation1">Modal title {{i.admin.first_name}}&nbsp;{{i.admin.last_name}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="card card-table">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    {% include 'includes/messages.html' %}
+                                    <table id="table_id" class="table table-hover table-center mb-0 ">
+                                        <thead>
+                                        <tr>
+                                            <th style="width:68%">Сообщение</th>
+                                            <th style="width:30%">Cтатус</th>
+                                        </tr>
+                                        </thead>
+
+                                        <tbody>
+
+                                        {% for i in see_notification %}
+                                        <tr>
+                                            <td>
+                                                <h2 class="table-avatar">
+                                                    <a href="student-details.html">{{i.admin.first_name}}&nbsp;{{i.admin.last_name}}</a>
+                                                </h2>
+                                            </td>
+                                            <td>{{i.message}}</td>
+                                            {% if i.status == 1 %}
+                                            <td><span class="badge badge-success">Success</span></td>
+                                            {% elif i.status == 0 %}
+                                            <td><span class="badge badge-danger">Danger</span></td>
+                                            {% else %}
+                                            <span class="badge badge-warning">Warning</span>
+                                            {% endif %}
+                                        </tr>
+                                        {% endfor %}
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}
