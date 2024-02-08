@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect, HttpResponse
 from app.EmailBackEnd import EmailBackEnd
 from django.contrib.auth import authenticate, logout, login
@@ -20,11 +21,11 @@ def doLogin(request):
             if user_type == '1': return redirect('hod_home')
             elif user_type == '2': return redirect('staff_home')
             elif user_type == '3': return HttpResponse('This Emploes Panel')
-            else:
-                messages.error(request, 'Email and Password Are Invalid !')
-                return redirect('login')
+        else:
+            messages.error(request, 'Электронная почта и пароль неверны!')
+            return redirect('login')
     else:
-        messages.error(request, 'Email and Password Are Invalid !')
+        messages.error(request, 'Электронная почта и пароль неверны!')
         return redirect('login')
 
 def doLogout(request):
@@ -62,3 +63,14 @@ def PROFILE_UPDATE(request):
         except:
             messages.error(request, 'Ошибка ')
     return render(request, 'profile.html')
+
+def fORGOTPASSWORD(request):
+    if request.method == "POST":
+        user = EmailBackEnd.authenticate(request, username=request.POST.get('email'))
+        if user != None:
+            messages.success(request, 'Вы крут!')
+        else:
+            messages.error(request, 'Вы не зарегистрированы')
+            return redirect('login')
+    else:
+        return redirect('forgotPassword')

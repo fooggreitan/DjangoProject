@@ -4,21 +4,22 @@ Template Name: Preskool - Bootstrap Admin Template
 Version      : 1.0
 */
 
+
 (function($) {
     "use strict";
-	
+
 	// Variables declarations
-	
+
 	var $wrapper = $('.main-wrapper');
 	var $pageWrapper = $('.page-wrapper');
 	var $slimScrolls = $('.slimscroll');
-	
+
 	// Sidebar
-	
+
 	var Sidemenu = function() {
 		this.$menuItem = $('#sidebar-menu a');
 	};
-	
+
 	function init() {
 		var $this = Sidemenu;
 		$('#sidebar-menu a').on('click', function(e) {
@@ -37,12 +38,12 @@ Version      : 1.0
 		});
 		$('#sidebar-menu ul li.submenu a.active').parents('li:last').children('a:first').addClass('active').trigger('click');
 	}
-	
+
 	// Sidebar Initiate
 	init();
-	
+
 	// Mobile menu sidebar overlay
-	
+
 	$('body').append('<div class="sidebar-overlay"></div>');
 	$(document).on('click', '#mobile_btn', function() {
 		$wrapper.toggleClass('slide-nav');
@@ -50,42 +51,42 @@ Version      : 1.0
 		$('html').addClass('menu-opened');
 		return false;
 	});
-	
+
 	// Sidebar overlay
-	
+
 	$(".sidebar-overlay").on("click", function () {
 		$wrapper.removeClass('slide-nav');
 		$(".sidebar-overlay").removeClass("opened");
 		$('html').removeClass('menu-opened');
 	});
-	
+
 	// Page Content Height
-	
+
 	if($('.page-wrapper').length > 0 ){
-		var height = $(window).height();	
+		var height = $(window).height();
 		$(".page-wrapper").css("min-height", height);
 	}
-	
+
 	// Page Content Height Resize
-	
+
 	$(window).resize(function(){
 		if($('.page-wrapper').length > 0 ){
 			var height = $(window).height();
 			$(".page-wrapper").css("min-height", height);
 		}
 	});
-	
+
 	// Select 2
-	
+
     if ($('.select').length > 0) {
         $('.select').select2({
             minimumResultsForSearch: -1,
             width: '100%'
         });
     }
-	
+
 	// Datetimepicker
-	
+
 	if($('.datetimepicker').length > 0 ){
 		$('.datetimepicker').datetimepicker({
 			format: 'DD-MM-YYYY',
@@ -104,11 +105,11 @@ Version      : 1.0
 	}
 
 	// Tooltip
-	
+
 	if($('[data-toggle="tooltip"]').length > 0 ){
 		$('[data-toggle="tooltip"]').tooltip();
 	}
-	
+
     // Datatable
 
     if ($('.datatable').length > 0) {
@@ -118,7 +119,7 @@ Version      : 1.0
     }
 
 	// Check all email
-	
+
 	$(document).on('click', '#check_all', function() {
 		$('.checkmail').click();
 		return false;
@@ -134,15 +135,15 @@ Version      : 1.0
 			});
 		});
 	}
-	
+
 	// Mail important
-	
+
 	$(document).on('click', '.mail-important', function() {
 		$(this).find('i.fa').toggleClass('fa-star').toggleClass('fa-star-o');
 	});
-	
+
 	// Summernote
-	
+
 	if($('.summernote').length > 0) {
 		$('.summernote').summernote({
 			height: 200,                 // set editor height
@@ -151,8 +152,8 @@ Version      : 1.0
 			focus: false                 // set focus to editable area after initializing summernote
 		});
 	}
-	
-	
+
+
 	// Sidebar Slimscroll
 
 	if($slimScrolls.length > 0) {
@@ -175,7 +176,7 @@ Version      : 1.0
 			$('.sidebar .slimScrollDiv').height(rHeight);
 		});
 	}
-	
+
 	// Small Sidebar
 
 	$(document).on('click', '#toggle_btn', function() {
@@ -186,7 +187,7 @@ Version      : 1.0
 			$('body').addClass('mini-sidebar');
 			$('.subdrop + ul').slideUp();
 		}
-		setTimeout(function(){ 
+		setTimeout(function(){
 			mA.redraw();
 			mL.redraw();
 		}, 300);
@@ -260,20 +261,20 @@ Version      : 1.0
 				});
 			}
 		});
-	}	
-	
+	}
+
 	if($('.circle-bar').length > 0) {
 		animateElements();
 	}
 	$(window).scroll(animateElements);
-	
+
 	// Preloader
-	
+
 	$(window).on('load', function () {
 		if($('#loader').length > 0) {
 			$('#loader').delay(350).fadeOut('slow');
 			$('body').delay(350).css({ 'overflow': 'visible' });
 		}
 	})
-	
+
 })(jQuery);
