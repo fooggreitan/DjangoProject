@@ -82,7 +82,6 @@ def DELETE_STAFF(request, admin):
 
 @login_required(login_url='/')
 def VIEW_TASK(request):
-
     staff = Staff.objects.all()
     see_notification = Staff_Notification.objects.all().order_by('-id')[0:5]
     context = {
@@ -95,6 +94,7 @@ def VIEW_TASK(request):
 def VIEW_ATT(request):
     return render(request, 'Hod/view_attendance.html')
 
+@login_required(login_url='/')
 def STAFF_SEND_NOTIFICATION(request):
     staff = Staff.objects.all()
     see_notification = Staff_Notification.objects.all().order_by('-id')[0:5]
@@ -105,6 +105,7 @@ def STAFF_SEND_NOTIFICATION(request):
     return render(request, 'Hod/staff_send_notification.html', context)
 
 
+@login_required(login_url='/')
 def STAFF_SAVE_NOTIFICATION(request):
     if request.method == "POST":
         staff_id = request.POST.get('staff_id')
@@ -120,6 +121,7 @@ def STAFF_SAVE_NOTIFICATION(request):
     return redirect('staff_send_notification')
 
 
+@login_required(login_url='/')
 def ABOUT_PROFILE(request):
     staff = Staff.objects.all()
     context = {
@@ -127,7 +129,7 @@ def ABOUT_PROFILE(request):
     }
     return render(request, 'Hod/about_profile.html', context)
 
-
+@login_required(login_url='/')
 def VIEW_STAFF_TASK(request):
     staff = Staff.objects.all()
     see_notification = Staff_Notification.objects.all().order_by('-id')
