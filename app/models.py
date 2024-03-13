@@ -39,7 +39,6 @@ class Task(models.Model):
     def __str__(self):
         return self.task
 
-
 class Attendance(models.Model):
     staff_id = models.ForeignKey(Staff, on_delete=models.DO_NOTHING)
     task_id = models.ForeignKey(Task, on_delete=models.DO_NOTHING)
@@ -52,11 +51,13 @@ class Attendance(models.Model):
 
 
 class Attendance_Report(models.Model):
-    staff_id = models.ForeignKey(Staff, on_delete=models.DO_NOTHING)
-    task_id = models.ForeignKey(Task, on_delete=models.DO_NOTHING)
-    attendance_id = models.ForeignKey(Attendance, on_delete=models.CASCADE)
+    # staff_id = models.ForeignKey(Staff, on_delete=models.DO_NOTHING)
+    # task_id = models.ForeignKey(Task, on_delete=models.DO_NOTHING)
+
+    attendance_id = models.AutoField(primary_key=True)
+    name_report = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.staff_id.admin.first_name
+        return self.name_report

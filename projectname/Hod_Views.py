@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from app.models import CustomUser, Staff, Task, Staff_Notification
+from app.models import CustomUser, Staff, Task, Staff_Notification, Attendance_Report
 from django.contrib import messages
 
 @login_required(login_url='/')
@@ -139,5 +139,11 @@ def VIEW_STAFF_TASK(request):
     }
     return render(request, 'Staff/view_task.html', context)
 
+@login_required(login_url='/')
 def ADD_REPORT(request):
-    return render(request, 'Hod/add_report.html')
+    report = Attendance_Report.objects.all()
+    # print(report)
+    content = {
+        "compot": report
+    }
+    return render(request, 'Hod/add_report.html', content)
