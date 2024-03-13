@@ -138,3 +138,6 @@ def VIEW_STAFF_TASK(request):
         'see_notification': see_notification
     }
     return render(request, 'Staff/view_task.html', context)
+
+def ADD_REPORT(request):
+    return render(request, 'Hod/add_report.html')
