@@ -8,7 +8,8 @@ class UserModel(UserAdmin):
 admin.site.register(CustomUser, UserModel)
 admin.site.register(Staff)
 admin.site.register(Task)
-admin.site.register(Attendance)
+# admin.site.register(Attendance)
 admin.site.register(Attendance_Report)
 admin.site.register(Staff_Notification)
+admin.site.register(Customer)
 
