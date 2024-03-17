@@ -47,7 +47,4 @@ urlpatterns = [
     path('Hod/Staff/Send_Notification', Hod_Views.STAFF_SEND_NOTIFICATION, name='staff_send_notification'),
     path('Hod/Staff/save_notification', Hod_Views.STAFF_SAVE_NOTIFICATION, name='staff_save_notification'),
 
-]
-
-urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
-urlpatterns += static(settings.STATIC_URL, document_root = settings.STATIC_URL)
+] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

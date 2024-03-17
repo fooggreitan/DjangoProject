@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "app",
     "active_link",
-
     # "qualifier.apps.ClubConfig",
     # "qualifier.apps.DefaultRouter"
 ]
@@ -75,19 +74,19 @@ WSGI_APPLICATION = "projectname.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": BASE_DIR / "db.sqlite3",
-    # }
-
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "qualifier",
-        'USER': 'postgres',
-        'PASSWORD': 'Vvhfddrvgd123+',
-        'HOST': '127.0.0.1',
-        'PORT': 5432
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
+
+    # "default": {
+    #     "ENGINE": "django.db.backends.postgresql",
+    #     "NAME": "qualifier",
+    #     'USER': 'postgres',
+    #     'PASSWORD': 'Vvhfddrvgd123+',
+    #     'HOST': 'localhost',
+    #     'PORT': 5432
+    # }
 
     # 'club_db': {
     #     'NAME': 'qualifier',
@@ -122,19 +121,20 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
+
 TIME_ZONE = "UTC"
+
 USE_I18N = True
+
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "/static/"
-MEDIA_URL = "/media/"
 STATIC_ROOT = "/static/"
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
