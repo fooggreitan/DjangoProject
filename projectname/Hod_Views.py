@@ -141,9 +141,10 @@ def VIEW_STAFF_TASK(request):
 
 @login_required(login_url='/')
 def ADD_REPORT(request):
-    report= Attendance_Report.objects.all()
+    report = Attendance_Report.objects.all()
     # print(report)
     content = {
         "content": report
     }
+    print(content)
     return render(request, 'Hod/add_report.html', content)
