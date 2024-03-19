@@ -91,8 +91,7 @@
             <div class="col-sm">
                 <a href="#" class="btn btn-outline-secondary mr-2"><i class=""></i> Очистить </a>
                 {% for reports in object_list %}
-                <a href="{% url 'app:pdf-view' reports.pk %}" class="btn btn-outline-secondary mr-2"><i class=""></i>
-                    Сделать PDF файл</a>
+                <a href="{% url 'app:pdf-view' reports.pk %}" class="btn btn-outline-secondary mr-2"><i class=""></i> Сделать PDF файл</a>
                 {% endfor %}
             </div>
         </div>

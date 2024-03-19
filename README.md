@@ -1,4 +1,4 @@
-Описание проекта Django
+##Описание проекта Django
 
 Документация команд: https://getkt.com/2022/12/10/django-django-admin-command-reference/
 

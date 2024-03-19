@@ -8,7 +8,7 @@ urlpatterns = [
     # path("admin/", admin.site.urls),
     # path('', include('projectname.urls')),
 
-    path('', AppListView.as_view(), name='list-view'),
+    path('Hod/Report', AppListView.as_view(), name='list-view'),
     # path('test/', render_pdf_view, name='test-view'),
     path('pdf/<pk>/', app_render_pdf_view, name='pdf-view'),
 ]

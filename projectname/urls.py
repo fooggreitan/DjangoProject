@@ -34,7 +34,7 @@ urlpatterns = [
 
     # Hod panel
     path('Hod/Home', Hod_Views.HOME, name='hod_home'),
-    path(' ', Hod_Views.ADD_REPORT, name='add_report'),
+    path('Hod/Report', Hod_Views.ADD_REPORT, name='add_report'),
     # path('Hod/Report', Hod_Views.chatbot, name='chatGPT_add_report'),
 
     path('Hod/Staff/Add', Hod_Views.ADD_STAFF, name='add_staff'),
