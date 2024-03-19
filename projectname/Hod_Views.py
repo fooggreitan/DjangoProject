@@ -3,6 +3,13 @@ from django.contrib.auth.decorators import login_required
 from app.models import CustomUser, Staff, Task, Staff_Notification, Attendance_Report
 from django.contrib import messages
 
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.views.generic import ListView
+from app.models import Customer
+
 @login_required(login_url='/')
 def HOME(request):
     staff_count = Staff.objects.all().count()
@@ -141,10 +148,56 @@ def VIEW_STAFF_TASK(request):
 
 @login_required(login_url='/')
 def ADD_REPORT(request):
+
+    # print(request.method)
+    #
+    # if request.method == "POST":
+    #     # message = request.POST.get('message')
+    #     response = 'Привет'
+    #     content = {
+    #         "response": response
+    #     }
+    #     return render(request, 'Hod/add_report.html', content)
+
     report = Attendance_Report.objects.all()
     # print(report)
     content = {
-        "content": report
+        "content": report,
     }
     print(content)
     return render(request, 'Hod/add_report.html', content)
+
+from django.http import JsonResponse
+# def chatbot(request):
+#     if request.method == "POST":
+#         # message = request.POST.get('message')
+#         response = "привет"
+#         content = {
+#             "response": response
+#         }
+#         return render(request, 'Hod/add_report.html', content)
+#     return render(request, 'Hod/add_report.html')
+
+@login_required(login_url='/')
+def app_render_pdf_view(request, *args, **kwargs):
+    report_pdf = kwargs.get('pk')
+    app_report = get_object_or_404(Customer, pk=report_pdf)
+    template_path = 'report/pdf2.html'  # шаблон
+    context = {'app_report': app_report}  # передеча в шаблон
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    # if download:
+    # response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+    # if display:
+    response['Content-Disposition'] = 'filename="report.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+        html, dest=response)
+    # if error then show some funny view
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response

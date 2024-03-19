@@ -74,3 +74,19 @@ def fORGOTPASSWORD(request):
             return redirect('login')
     else:
         return redirect('forgotPassword')
+
+# def app_render_pdf_view(request, *args, **kwargs):
+#     report_pdf = kwargs.get('pk')
+#     app_report = get_object_or_404(Customer, pk=report_pdf)
+#     template_path = 'Hod/pdf2.html'
+#     context = {'app_report': app_report}
+#     response = HttpResponse(content_type='application/pdf')
+#     response['Content-Disposition'] = 'filename="report.pdf"'
+#     template = get_template(template_path)
+#     html = template.render(context)
+#
+#     pisa_status = pisa.CreatePDF(
+#         html, dest=response)
+#     if pisa_status.err:
+#         return HttpResponse('We had some errors <pre>' + html + '</pre>')
+#     return response

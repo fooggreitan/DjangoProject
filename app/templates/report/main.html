@@ -7,10 +7,6 @@
 {% block content %}
 <!--    {% for reports in object_list %}-->
 <!--        {{reports}}-->
-{% for reports_pk in model %}
-<a href="{% url 'reportPDF:pdf-view' app_report.pk %}">
-    <button class="btn btn-primary">pdf</button>
-</a>
-{% endfor %}
+        <a href="{% url 'reportPDF:pdf-view' reports.pk %}"><button class="btn btn-primary">pdf</button></a>
 <!--    {% endfor %}-->
 {% endblock %}

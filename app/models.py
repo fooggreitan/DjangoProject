@@ -11,6 +11,15 @@ class CustomUser(AbstractUser):
     user_type = models.CharField(choices=USER, max_length=50, default=1)
     profile_pic = models.ImageField(upload_to='media/profile_pic')
 
+class Customer(models.Model):
+    name = models.CharField(max_length=200)
+    logo = models.ImageField()
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.name)
 
 class Staff(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
