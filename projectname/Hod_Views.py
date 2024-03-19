@@ -1,7 +1,14 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from app.models import CustomUser, Staff, Task, Staff_Notification
+from app.models import CustomUser, Staff, Task, Staff_Notification, Attendance_Report
 from django.contrib import messages
+
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.views.generic import ListView
+from app.models import Customer
 
 @login_required(login_url='/')
 def HOME(request):
@@ -82,7 +89,6 @@ def DELETE_STAFF(request, admin):
 
 @login_required(login_url='/')
 def VIEW_TASK(request):
-
     staff = Staff.objects.all()
     see_notification = Staff_Notification.objects.all().order_by('-id')[0:5]
     context = {
@@ -95,6 +101,7 @@ def VIEW_TASK(request):
 def VIEW_ATT(request):
     return render(request, 'Hod/view_attendance.html')
 
+@login_required(login_url='/')
 def STAFF_SEND_NOTIFICATION(request):
     staff = Staff.objects.all()
     see_notification = Staff_Notification.objects.all().order_by('-id')[0:5]
@@ -105,6 +112,7 @@ def STAFF_SEND_NOTIFICATION(request):
     return render(request, 'Hod/staff_send_notification.html', context)
 
 
+@login_required(login_url='/')
 def STAFF_SAVE_NOTIFICATION(request):
     if request.method == "POST":
         staff_id = request.POST.get('staff_id')
@@ -120,6 +128,7 @@ def STAFF_SAVE_NOTIFICATION(request):
     return redirect('staff_send_notification')
 
 
+@login_required(login_url='/')
 def ABOUT_PROFILE(request):
     staff = Staff.objects.all()
     context = {
@@ -127,7 +136,7 @@ def ABOUT_PROFILE(request):
     }
     return render(request, 'Hod/about_profile.html', context)
 
-
+@login_required(login_url='/')
 def VIEW_STAFF_TASK(request):
     staff = Staff.objects.all()
     see_notification = Staff_Notification.objects.all().order_by('-id')
@@ -136,3 +145,59 @@ def VIEW_STAFF_TASK(request):
         'see_notification': see_notification
     }
     return render(request, 'Staff/view_task.html', context)
+
+@login_required(login_url='/')
+def ADD_REPORT(request):
+
+    # print(request.method)
+    #
+    # if request.method == "POST":
+    #     # message = request.POST.get('message')
+    #     response = 'Привет'
+    #     content = {
+    #         "response": response
+    #     }
+    #     return render(request, 'Hod/add_report.html', content)
+
+    report = Attendance_Report.objects.all()
+    # print(report)
+    content = {
+        "content": report,
+    }
+    print(content)
+    return render(request, 'Hod/add_report.html', content)
+
+from django.http import JsonResponse
+# def chatbot(request):
+#     if request.method == "POST":
+#         # message = request.POST.get('message')
+#         response = "привет"
+#         content = {
+#             "response": response
+#         }
+#         return render(request, 'Hod/add_report.html', content)
+#     return render(request, 'Hod/add_report.html')
+
+@login_required(login_url='/')
+def app_render_pdf_view(request, *args, **kwargs):
+    report_pdf = kwargs.get('pk')
+    app_report = get_object_or_404(Customer, pk=report_pdf)
+    template_path = 'report/pdf2.html'  # шаблон
+    context = {'app_report': app_report}  # передеча в шаблон
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    # if download:
+    # response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+    # if display:
+    response['Content-Disposition'] = 'filename="report.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+        html, dest=response)
+    # if error then show some funny view
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
