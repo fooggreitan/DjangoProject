@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="content container-fluid">
+<div class="content container-fluid" xmlns="http://www.w3.org/1999/html">
     <div class="page-header">
         <div class="row align-items-center">
             <div class="col">
@@ -25,7 +25,6 @@
                         <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Отчты</th>
                             <th>Название</th>
                             <th>Дата добавления</th>
                             <th>Дата изменения</th>
@@ -34,45 +33,74 @@
                         </thead>
 
                         <tbody>
-                            <!--                            {% for i in staff %}-->
-                            <tr>
-                                <td></td>
 
-                                <td>
-                                    <h2 class="table-avatar">
-                                        <a href="student-details.html" class="avatar avatar-sm mr-2">
-                                            <img
-                                                class="avatar-img rounded-circle"
-                                                src="" alt="User Image">
-                                        </a>
-                                        <a href=""></a>
-                                    </h2>
-                                </td>
+                        {% for i in content %}
+                        <tr>
+                            <td>{{i.id}}</td>
+                            <!--                            <td>-->
+                            <!--                                <h2 class="table-avatar">-->
+                            <!--                                    <a href="student-details.html" class="avatar avatar-sm mr-2">-->
+                            <!--                                        <img-->
+                            <!--                                                class="avatar-img rounded-circle"-->
+                            <!--                                                src="" alt="User Image">-->
+                            <!--                                    </a>-->
+                            <!--                                    <a href=""></a>-->
+                            <!--                                </h2>-->
+                            <!--                            </td>-->
 
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+                            <td>{{i.name_report}}</td>
+                            <td>{{i.created_at}}</td>
+                            <td>{{i.updated_at}}</td>
 
-                                <td class="text-right">
-                                    <div class="actions">
-                                        <a href="" class="btn btn-sm bg-success-light mr-2">
-                                            <i class="fas fa-pen"></i>
-                                        </a>
-                                        <a href="" class="btn btn-sm bg-danger-light">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            <!--                            {% endfor %}-->
+                            <td class="text-right">
+                                <div class="d-grid gap-2 d-md-block">
+                                    <a href="" class="btn btn-sm bg-primary-light mr-2">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <a href="" class="btn btn-sm bg-primary-light mr-2">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    <a href="" class="btn btn-sm bg-primary-light">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+
+        <div class="form-group row">
+            <div class="col-sm">
+                <form action="{% url 'chatbot_view' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="submit" class="btn btn-outline-secondary mr-2">
+                    <textarea name="textPostSelect" class="form-control" id="exampleFormControlTextarea2"
+                          rows="3">йцу</textarea>
+                </form>
+            </div>
+        </div>
+        <div id="conversation">
+            <div class="mb-3">
+<!--                <textarea name="textPostSelect" class="form-control" id="exampleFormControlTextarea2"-->
+<!--                          rows="3">йцу</textarea>-->
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm">
+                <a href="#" class="btn btn-outline-secondary mr-2"><i class=""></i> Очистить </a>
+                {% for reports in object_list %}
+                <a href="{% url 'app:pdf-view' reports.pk %}" class="btn btn-outline-secondary mr-2"><i class=""></i>
+                    Сделать PDF файл</a>
+                {% endfor %}
+            </div>
+        </div>
+
     </div>
 </div>
-</div>
+
 
 {% endblock %}

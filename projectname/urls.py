@@ -1,23 +1,36 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .import views, Hod_Views, Staff_Views, Emploes_views
+from . import views, Hod_Views, Staff_Views, Emploes_views
+
+from . views import chatbot_view
 
 urlpatterns = [
 
-    path("admin/", admin.site.urls),
+    # path("admin/", admin.site.urls),
     path('base/', views.BASE, name='base'),
+    path("admin/", admin.site.urls),
+    # path('', include('app.urls', namespace='app')),
 
-    #login
-    path('',views.LOGIN, name='login'),
-    path('forgotPassword',views.fORGOTPASSWORD, name='forgotPassword'),
-    path('doLogin',views.doLogin, name='doLogin'),
+    # path('', views.query_view, name='query'),
+
+    # path('Hod/hello/', include('app.urls', namespace='app')),
+    # path('Hod/add_report.html', AppListView.as_view(), name='list-view'),
+    # path('test/', render_pdf_view, name='test-view'),
+    # path('pdf/<pk>/', app_render_pdf_view, name='pdf-view'),
+
+    path('Hod/Report#', views.chatbot_view, name='chatbot_view'),
+
+    # login
+    path('', views.LOGIN, name='login'),
+    path('forgotPassword', views.fORGOTPASSWORD, name='forgotPassword'),
+    path('doLogin', views.doLogin, name='doLogin'),
 
     path('doLogout', views.doLogout, name='logout'),
 
-    #profile
+    # profile
     path('Profile', views.PROFILE, name='profile'),
 
     # update profile
@@ -27,6 +40,7 @@ urlpatterns = [
     # Hod panel
     path('Hod/Home', Hod_Views.HOME, name='hod_home'),
     path('Hod/Report', Hod_Views.ADD_REPORT, name='add_report'),
+    # path('Hod/Report', Hod_Views.chatbot, name='chatGPT_add_report'),
 
     path('Hod/Staff/Add', Hod_Views.ADD_STAFF, name='add_staff'),
     path('Hod/Staff/View', Hod_Views.VIEW_STAFF, name='view_staff'),
@@ -46,5 +60,7 @@ urlpatterns = [
     # Уведомления
     path('Hod/Staff/Send_Notification', Hod_Views.STAFF_SEND_NOTIFICATION, name='staff_send_notification'),
     path('Hod/Staff/save_notification', Hod_Views.STAFF_SAVE_NOTIFICATION, name='staff_save_notification'),
+]
 
-] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS)

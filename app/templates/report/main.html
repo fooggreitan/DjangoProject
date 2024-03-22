@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+<!--{% block title %}-->
+<!--report-->
+<!--{% endblock title %}-->
+
+{% block content %}
+<!--    {% for reports in object_list %}-->
+<!--        {{reports}}-->
+        <a href="{% url 'reportPDF:pdf-view' reports.pk %}"><button class="btn btn-primary">pdf</button></a>
+<!--    {% endfor %}-->
+{% endblock %}
