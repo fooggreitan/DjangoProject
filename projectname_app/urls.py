@@ -3,30 +3,38 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .import views, Hod_Views, Staff_Views, Emploes_views
+from . import views, Hod_Views, Staff_Views, Emploes_views
+
+from .Hod_Views import app_render_pdf_view
+
+app_name = 'projectname_app'
 
 urlpatterns = [
 
     # path("admin/", admin.site.urls),
     path('base/', views.BASE, name='base'),
     path("admin/", admin.site.urls),
+    # path('', include('app.urls', namespace='app')),
 
-    path('', include('app.urls')),
-
-    # path('Hod/hello/', include('app.urls', namespace='app')),
+    # path('Hod/hello/', include('a pp.urls', namespace='app')),
     # path('Hod/add_report.html', AppListView.as_view(), name='list-view'),
     # path('test/', render_pdf_view, name='test-view'),
     # path('pdf/<pk>/', app_render_pdf_view, name='pdf-view'),
 
-    #login
-    path('',views.LOGIN, name='login'),
-    path('forgotPassword',views.fORGOTPASSWORD, name='forgotPassword'),
-    path('doLogin',views.doLogin, name='doLogin'),
+    # path('Hod/Report', AppListView.as_view(), name='list-view'),
+    path('pdf/', app_render_pdf_view, name='pdf-view'),
+
+    # login
+    path('', views.LOGIN, name='login'),
+    path('forgotPassword', views.fORGOTPASSWORD, name='forgotPassword'),
+    path('doLogin', views.doLogin, name='doLogin'),
 
     path('doLogout', views.doLogout, name='logout'),
 
-    #profile
+    # profile
     path('Profile', views.PROFILE, name='profile'),
+
+    path('Hod/Report#', Hod_Views.chatbot_view, name='chatbot_view'),
 
     # update profile
     path('Profile/update', views.PROFILE_UPDATE, name='profile_update'),
@@ -57,6 +65,5 @@ urlpatterns = [
     path('Hod/Staff/save_notification', Hod_Views.STAFF_SAVE_NOTIFICATION, name='staff_save_notification'),
 
 ]
-
-urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
-urlpatterns += static(settings.STATIC_URL, document_root = settings.STATIC_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS)

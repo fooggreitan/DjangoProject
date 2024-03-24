@@ -64,7 +64,8 @@ class Attendance_Report(models.Model):
     # task_id = models.ForeignKey(Task, on_delete=models.DO_NOTHING)
 
     # new_id = models.ForeignKey (Staff, on_delete=models.DO_NOTHING, primary_key=True, unique=True)
-    name_report = models.TextField()
+    name_report = models.CharField(max_length=200)
+    description = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

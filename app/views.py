@@ -5,9 +5,9 @@ from xhtml2pdf import pisa
 from django.views.generic import ListView
 from .models import Customer
 
-class AppListView(ListView):
-    model = Customer
-    template_name = 'Hod/add_report.html'
+# class AppListView(ListView):
+#     model = Customer
+#     template_name = 'Hod/add_report.html'
 
 def app_render_pdf_view(request, *args, **kwargs):
     PDF_report = kwargs.get('pk')

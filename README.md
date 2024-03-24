@@ -47,4 +47,5 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 7) POST AND GET
 https://yandex.ru/video/preview/2198961803011279516
 8) Исправлен имя переменной app и вставлен ссылка и цикл "{% url 'app:pdf-view' reports.pk %}"
-9) 
+9) https://pythonguides.com/convert-html-page-to-pdf-using-django/
+10) 

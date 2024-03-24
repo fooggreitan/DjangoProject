@@ -54,13 +54,13 @@
 
                             <td class="text-right">
                                 <div class="d-grid gap-2 d-md-block">
-                                    <a href="" class="btn btn-sm bg-primary-light mr-2">
-                                        <i class="fas fa-pen"></i>
-                                    </a>
+                                    <!--                                    <a href="" class="btn btn-sm bg-primary-light mr-2">-->
+                                    <!--                                        <i class="fas fa-pen"></i>-->
+                                    <!--                                    </a>-->
                                     <a href="" class="btn btn-sm bg-primary-light mr-2">
                                         <i class="fas fa-trash"></i>
                                     </a>
-                                    <a href="" class="btn btn-sm bg-primary-light">
+                                    <a href="{% url 'pdf-view' %}" class="btn btn-sm bg-primary-light">
                                         <i class="fas fa-download"></i>
                                     </a>
                                 </div>
@@ -73,26 +73,46 @@
             </div>
         </div>
 
-        <div class="form-group row">
-            <div class="col-sm">
-                <form action="{% url 'add_report' %}" method="POST">
-                    {% csrf_token %}
-                    <a href="#" class="btn btn-outline-secondary mr-2"><i class=""></i> Отправить</a>
-                </form>
+        <form action="{% url 'chatbot_view' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group row">
+                <div class="col-sm">
+                    <input type="submit" class="btn btn-outline-secondary mr-2">
+                </div>
+                <div class="col-sm">
+                    <select name="select_type_report" class="form-control">
+                        <option>Отчёт не выбран</option>
+                        <option>Отчет о проделанной работе за месяц</option>
+                        <option>Отчет о проделанной работе за день</option>
+                    </select>
+                </div>
+                <div class="col-sm">
+                    <select name="select_type_staff" class="form-control">
+                        <option>Сотрудник не выбран</option>
+                        {% for i in staff %}
+                        <option>{{i.admin.first_name}}&nbsp;{{i.admin.last_name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-        </div>
 
-        <div class="mb-3">
-            <!--          <label for="exampleFormControlTextarea1" class="form-label">Example textarea</label>-->
-            <textarea class="form-control" id="exampleFormControlTextarea2" rows="3">{{response}}</textarea>
-        </div>
+            <div class="mb-3">
+            <textarea class="form-control" id="exampleFormControlTextarea2"
+                      rows="3">{{response}}</textarea>
+            </div>
+        </form>
+
+        <!--        <div class="mb-3">-->
+        <!--            &lt;!&ndash;          <label for="exampleFormControlTextarea1" class="form-label">Example textarea</label>&ndash;&gt;-->
+        <!--            <textarea name="textPostSelect" class="form-control" id="exampleFormControlTextarea2" rows="3">{{response}}</textarea>-->
+        <!--        </div>-->
 
         <div class="form-group row">
             <div class="col-sm">
                 <a href="#" class="btn btn-outline-secondary mr-2"><i class=""></i> Очистить </a>
-                {% for reports in object_list %}
-                <a href="{% url 'app:pdf-view' reports.pk %}" class="btn btn-outline-secondary mr-2"><i class=""></i> Сделать PDF файл</a>
-                {% endfor %}
+                <a href="{% url 'pdf-view' %}">
+                    <button class="btn btn-outline-secondary mr-2">Cделать PDF</button>
+                </a>
             </div>
         </div>
 
