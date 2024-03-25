@@ -12,3 +12,5 @@ admin.site.register(Attendance)
 admin.site.register(Attendance_Report)
 admin.site.register(Staff_Notification)
 
+admin.site.register(Customer)
+
