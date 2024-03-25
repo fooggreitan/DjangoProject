@@ -24,7 +24,7 @@
                     <table id="table_id" class="table table-hover table-center mb-0 ">
                         <thead>
                         <tr>
-                            <th>ID</th>
+<!--                            <th>ID</th>-->
                             <th>Название</th>
                             <th>Дата добавления</th>
                             <th>Дата изменения</th>
@@ -36,7 +36,7 @@
 
                         {% for i in content %}
                         <tr>
-                            <td>{{i.id}}</td>
+<!--                            <td>{{i.id}}</td>-->
                             <!--                            <td>-->
                             <!--                                <h2 class="table-avatar">-->
                             <!--                                    <a href="student-details.html" class="avatar avatar-sm mr-2">-->
@@ -57,11 +57,12 @@
                                     <!--                                    <a href="" class="btn btn-sm bg-primary-light mr-2">-->
                                     <!--                                        <i class="fas fa-pen"></i>-->
                                     <!--                                    </a>-->
-                                    <a href="" class="btn btn-sm bg-primary-light mr-2">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                    <a href="{% url 'pdf-view' %}" class="btn btn-sm bg-primary-light">
+
+                                    <a href="{% url 'pdf-view' i.id %}" class="btn btn-sm bg-primary-light">
                                         <i class="fas fa-download"></i>
+                                    </a>
+                                    <a href="{% url 'pdf-delete' i.id %}" class="btn btn-sm bg-primary-light mr-2">
+                                        <i class="fas fa-trash"></i>
                                     </a>
                                 </div>
                             </td>
@@ -110,9 +111,6 @@
         <div class="form-group row">
             <div class="col-sm">
                 <a href="#" class="btn btn-outline-secondary mr-2"><i class=""></i> Очистить </a>
-                <a href="{% url 'pdf-view' %}">
-                    <button class="btn btn-outline-secondary mr-2">Cделать PDF</button>
-                </a>
             </div>
         </div>
 

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from app.models import CustomUser, Staff, Task, Staff_Notification, Attendance_Report
@@ -194,63 +195,74 @@ def chatbot_view(request, *args, **kwargs):
         # user_input = request.POST.get('textPostSelect')
         # print(user_input)
 
+        customer = ""
+        staff = Customer.objects.values('name')
+        for i in staff: customer += i['name']
+
+        print(customer)
         print(select_report_type)
         print(select_type_staff)
 
-        prompts = []
+        if select_report_type != 'Отчёт не выбран':
+            prompts = []
 
-        '''Начальный системный промт'''
+            '''Начальный системный промт'''
 
-        prompts.append({"role": "system", "content": """
-        Ты являешься ботом который формирует отчёты от третьего лица (от лица компании Эркью)
-        Ты должен следовать всем требованиям формирования отчётов для эффективности и контроля
-        работы сотрудников организации. Вывод информации должен содержать только основную часть успехов
-        сорудников, ошибок сотрудников и рекомендации по улучшению их работы.
-        """})
+            prompts.append({"role": "system", "content": """
+                Ты являешься ботом который формирует отчёты от третьего лица (от лица компании Эркью)
+                Ты должен следовать всем требованиям формирования отчётов для эффективности и контроля
+                работы сотрудников организации. Вывод информации должен содержать только основную часть успехов
+                сорудников, ошибок сотрудников и рекомендации по улучшению их работы.
+            """})
 
-        '''Промт сотрудника за месяц'''
+            '''Промт сотрудника за месяц'''
 
-        if select_type_staff == "Сотрудник не выбран":
-            prompts.append({"role": "user", "content": """
-                Cделай %(select_report_type)s включая каждого сотрудника
-            """.format({
-                "select_report_type": select_report_type
-            })})
+            if select_type_staff == "Сотрудник не выбран":
+                prompts.append({"role": "user", "content": "Cделай {0} включая каждого сотрудников {1}".format(
+                    select_report_type,
+                    customer
+                )})
+            else:
+                prompts.append({"role": "user", "content": "Cделай {0} по сотруднику {1}".format(
+                    select_report_type,
+                    select_type_staff
+                )})
+
+            # Append conversation messages to prompts
+            # prompts.extend(conversation)
+
+            # Set up and invoke the ChatGPT model
+
+            response = openai.ChatCompletion.create(
+                model="ft:gpt-3.5-turbo-0613:personal::7wZAALHG",
+                messages=prompts,
+                api_key="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",
+                max_tokens=1200,
+                temperature=0.2,
+                top_p=1,
+                frequency_penalty=0.5,
+                presence_penalty=0.5
+            )
+
+            res_Bot = response['choices'][0]['message']['content']
+
+            print(res_Bot)
+
+            '''' Создание отчёта'''
+
+            add_new_report = Attendance_Report(
+                name_report=select_report_type,
+                description=res_Bot
+            )
+            add_new_report.save()
+
+            prompts.clear()
+
+            messages.success(request, "Вы успешно создали отчёт!")
+            return redirect('add_report')
         else:
-            prompts.append({"role": "user", "content": """
-                Cделай %(select_report_type)s по сотруднику %(select_type_staff)s
-            """.format({
-                "select_report_type": select_report_type,
-                "select_type_staff": select_type_staff
-            })})
-
-        # Append conversation messages to prompts
-        # prompts.extend(conversation)
-
-        # Set up and invoke the ChatGPT model
-
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-1106",
-            messages=prompts,
-            api_key="ft:gpt-3.5-turbo-0613:personal::7wZAALHG",
-            max_tokens = 1200,
-            temperature = 0.2,
-            top_p = 1,
-            frequency_penalty = 0.5,
-            presence_penalty = 0.5
-        )
-
-        res_Bot = response['choices'][0]['message']['content']
-
-        print(res_Bot)
-
-        '''' Создание отчёта'''
-
-        add_new_report = Attendance_Report(
-            name_report = select_report_type,
-            description = res_Bot
-        )
-        add_new_report.save()
+            messages.error(request, "Вы некорректно указали фильтр")
+            return redirect('add_report')
 
         # add_new_report_PDF = Customer(
         #     name_report=select_report_type,
@@ -268,11 +280,9 @@ def chatbot_view(request, *args, **kwargs):
         # Update the conversation in the session
         # request.session['conversation'] = conversation
 
-        return render(request, 'Hod/add_report.html')
     else:
         request.session.clear()
         return render(request, 'Hod/add_report.html', {'conversation': "Не получилось"})
-
 
 from io import BytesIO
 from django.http import HttpResponse
@@ -289,6 +299,7 @@ from django.views.generic import View
 from django.template.loader import render_to_string
 import os
 
+
 # class GeneratePdf(View):
 #     def get(self, request, *args, **kwargs):
 #         # getting the template
@@ -298,9 +309,23 @@ import os
 #         # rendering the template
 #         return HttpResponse(pdf, content_type='application/pdf')
 
-def app_render_pdf_view(request):
+def DELETEPDF(request, id):
+    delete_pdf = Attendance_Report.objects.get(id=id)
+    delete_pdf.delete()
+    messages.success(request, "Успешно удален!")
+    return redirect('add_report')
 
-    data = Attendance_Report.objects.get(id=5)
+def fetch_pdf_resources(uri, rel):
+    if uri.find(settings.MEDIA_URL) != -1:
+        path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ''))
+    elif uri.find(settings.STATIC_URL) != -1:
+        path = os.path.join(settings.STATIC_ROOT, uri.replace(settings.STATIC_URL, ''))
+    else:
+        path = None
+    return path
+
+def app_render_pdf_view(request, id):
+    data = Attendance_Report.objects.get(id=id)
     template_path = 'report/pdf2.html'
     context = {'pdf': data}
     response = HttpResponse(content_type='application/pdf')
@@ -308,7 +333,7 @@ def app_render_pdf_view(request):
     template = get_template(template_path)
     html = template.render(context)
     pisa_status = pisa.CreatePDF(
-        html.encode("UTF-8"), dest=response, encoding='UTF-8')
+        html.encode("UTF-8"), dest=response, encoding="UTF-8", link_callback=fetch_pdf_resources)
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response

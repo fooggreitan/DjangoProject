@@ -22,7 +22,8 @@ urlpatterns = [
     # path('pdf/<pk>/', app_render_pdf_view, name='pdf-view'),
 
     # path('Hod/Report', AppListView.as_view(), name='list-view'),
-    path('pdf/', app_render_pdf_view, name='pdf-view'),
+    path('pdf/<str:id>', app_render_pdf_view, name='pdf-view'),
+    path('Hod/Report/DeletePDF/<str:id>', Hod_Views.DELETEPDF, name='pdf-delete'),
 
     # login
     path('', views.LOGIN, name='login'),
@@ -66,4 +67,4 @@ urlpatterns = [
 
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
