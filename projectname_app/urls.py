@@ -7,8 +7,6 @@ from . import views, Hod_Views, Staff_Views, Emploes_views
 
 from .Hod_Views import app_render_pdf_view
 
-app_name = 'projectname_app'
-
 urlpatterns = [
 
     # path("admin/", admin.site.urls),
@@ -67,4 +65,4 @@ urlpatterns = [
 
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

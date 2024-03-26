@@ -324,6 +324,15 @@ def fetch_pdf_resources(uri, rel):
         path = None
     return path
 
+    # if settings.STATIC_URL and uri.startswith(settings.STATIC_URL):
+    #     path = os.path.join(settings.STATIC_ROOT, uri.replace(settings.STATIC_URL, ""))
+    # elif settings.MEDIA_URL and uri.startswith(settings.MEDIA_URL):
+    #     path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ""))
+    # else:
+    #     path = os.path.join(settings.STATIC_ROOT, uri)
+    # return path
+
+
 def app_render_pdf_view(request, id):
     data = Attendance_Report.objects.get(id=id)
     template_path = 'report/pdf2.html'
@@ -332,10 +341,17 @@ def app_render_pdf_view(request, id):
     response['Content-Disposition'] = 'filename="report.pdf"'
     template = get_template(template_path)
     html = template.render(context)
+
+    # Убедимся, что текст кодируется в UTF-8
+    html_utf8 = html.encode("UTF-8")
+
+    # Генерация PDF с указанием правильной кодировки
     pisa_status = pisa.CreatePDF(
-        html.encode("UTF-8"), dest=response, encoding="UTF-8", link_callback=fetch_pdf_resources)
+        html_utf8, dest=response, encoding="UTF-8", link_callback=fetch_pdf_resources)
+
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
+
     return response
 
 # def chatbot_view(request):
