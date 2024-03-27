@@ -74,8 +74,7 @@
             </div>
         </div>
 
-        <form action="{% url 'chatbot_view' %}" method="POST">
-            {% csrf_token %}
+        <form action="{% url 'chatbot_view' %}" method="POST">{% csrf_token %}
             <div class="form-group row">
                 <div class="col-sm">
                     <input type="submit" class="btn btn-outline-secondary mr-2">
@@ -85,6 +84,7 @@
                         <option>Отчёт не выбран</option>
                         <option>Отчет о проделанной работе за месяц</option>
                         <option>Отчет о проделанной работе за день</option>
+                        <option>Отчет о проделанной работе за неделю</option>
                     </select>
                 </div>
                 <div class="col-sm">

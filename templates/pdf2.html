@@ -5,10 +5,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+<!--     <link rel="stylesheet" href="{% static 'assets/css/fonts.css' %}">-->
     <style type="text/css">
-        @font-face { font-family: Arial; src: url("report/fonts/arial.ttf"); }
-        body {
-            font-family: Arial, sans-serif;
+        .SimpiAI {
+            display: block;
+            margin-left: auto;
+            margin-right: auto
+        }
+        h2 {
+            text-align: center
         }
     </style>
 </head>
@@ -17,12 +22,14 @@
 <header>
     <div class="headerSection">
         <div class="logoAndName">
-            <img src="static/assets/img/PhotoSimpiAI.png" height='100px'>
+            <img class = "SimpiAI" src="{% static 'assets/img/PhotoSimpiAI.png' %}" height='130px'>
         </div>
         <div>
             <h2>{{pdf.name_report}}</h2>
             <p>
-                <b>Дата создания:</b> {{pdf.created_at}}
+                <b>Дата:</b> {{pdf.created_at}}<br>
+                <b>Сотрудник:</b> {{pdf.}}<br>
+                <b>Должность:</b> {{pdf.}}
             </p>
         </div>
     </div>
@@ -31,14 +38,14 @@
         <div class="issuedTo">
             <h3>Описание</h3>
             <p>
-                {{pdf.description}}
+                {% spaceless %}
+                {{pdf.description|linebreaks}}
+                {% endspaceless %}
             </p>
         </div>
         <div>
             <p>
-                <b>Notes</b>
-                <br/>
-                asdasd
+                <b>Примечания</b><br/>
             </p>
         </div>
     </div>
@@ -52,7 +59,7 @@
 
 <aside>
     <hr/>
-    <b>Terms &amp; Conditions</b>
+    <b>Правила и условия</b>
     <p>
         ...
     </p>

@@ -192,6 +192,7 @@ def chatbot_view(request, *args, **kwargs):
     if request.method == 'POST':
         select_report_type = request.POST.get('select_type_report')
         select_type_staff = request.POST.get('select_type_staff')
+
         # user_input = request.POST.get('textPostSelect')
         # print(user_input)
 
@@ -255,7 +256,6 @@ def chatbot_view(request, *args, **kwargs):
                 description=res_Bot
             )
             add_new_report.save()
-
             prompts.clear()
 
             messages.success(request, "Вы успешно создали отчёт!")
@@ -283,6 +283,7 @@ def chatbot_view(request, *args, **kwargs):
     else:
         request.session.clear()
         return render(request, 'Hod/add_report.html', {'conversation': "Не получилось"})
+
 
 from io import BytesIO
 from django.http import HttpResponse
@@ -315,44 +316,95 @@ def DELETEPDF(request, id):
     messages.success(request, "Успешно удален!")
     return redirect('add_report')
 
-def fetch_pdf_resources(uri, rel):
-    if uri.find(settings.MEDIA_URL) != -1:
-        path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ''))
-    elif uri.find(settings.STATIC_URL) != -1:
-        path = os.path.join(settings.STATIC_ROOT, uri.replace(settings.STATIC_URL, ''))
-    else:
-        path = None
-    return path
+import os
+from django.conf import settings
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.contrib.staticfiles import finders
 
-    # if settings.STATIC_URL and uri.startswith(settings.STATIC_URL):
-    #     path = os.path.join(settings.STATIC_ROOT, uri.replace(settings.STATIC_URL, ""))
-    # elif settings.MEDIA_URL and uri.startswith(settings.MEDIA_URL):
-    #     path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ""))
-    # else:
-    #     path = os.path.join(settings.STATIC_ROOT, uri)
-    # return path
 
+# def link_callback(uri, rel):
+#     """
+#     Convert HTML URIs to absolute system paths so xhtml2pdf can access those
+#     resources
+#     """
+#     result = finders.find(uri)
+#     if result:
+#         if not isinstance(result, (list, tuple)):
+#             result = [result]
+#         result = list(os.path.realpath(path) for path in result)
+#         path = result[0]
+#     else:
+#         sUrl = settings.STATIC_URL
+#         sRoot = settings.STATIC_ROOT
+#         mUrl = settings.MEDIA_URL
+#         mRoot = settings.MEDIA_ROOT
+#
+#         if uri.startswith(mUrl):
+#             path = os.path.join(mRoot, uri.replace(mUrl, ""))
+#         elif uri.startswith(sUrl):
+#             path = os.path.join(sRoot, uri.replace(sUrl, ""))
+#         else:
+#             return uri
+#
+#     print(
+#         "path: " + path,
+#         "result: " + result
+#     )
+#
+#     # make sure that file exists
+#     if not os.path.isfile(path):
+#         raise RuntimeError(
+#             'media URI must start with %s or %s' % (sUrl, mUrl)
+#         )
+#     return path
+
+import pdfkit
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.template.loader import get_template
+
+
+# def app_render_pdf_view(request):
+#     data = Attendance_Report.objects.get(id=id)
+#     context = {'pdf': data}
+#
+#     html = render_to_string('pdf2.html', context)
+#     pdf = pdfkit.from_string(html, False)
+#     filename = "sample_pdf.pdf"
+#
+#     response = HttpResponse(pdf, content_type='application/pdf')
+#     response['Content-Disposition'] = 'filename="' + filename + '"'
+#     return response
 
 def app_render_pdf_view(request, id):
     data = Attendance_Report.objects.get(id=id)
-    template_path = 'report/pdf2.html'
-    context = {'pdf': data}
-    response = HttpResponse(content_type='application/pdf')
+    template = get_template('pdf2.html')
+    html = template.render({'pdf': data})
+    pdf = pdfkit.from_string(html, False, options = {
+        'encoding': "UTF-8",
+        "enable-local-file-access": ""
+    })
+    response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = 'filename="report.pdf"'
-    template = get_template(template_path)
-    html = template.render(context)
-
-    # Убедимся, что текст кодируется в UTF-8
-    html_utf8 = html.encode("UTF-8")
-
-    # Генерация PDF с указанием правильной кодировки
-    pisa_status = pisa.CreatePDF(
-        html_utf8, dest=response, encoding="UTF-8", link_callback=fetch_pdf_resources)
-
-    if pisa_status.err:
-        return HttpResponse('We had some errors <pre>' + html + '</pre>')
-
     return response
+
+# def app_render_pdf_view(request, id):
+#     data = Attendance_Report.objects.get(id=id)
+#     template_path = 'pdf2.html'
+#     context = {'pdf': data}
+#     response = HttpResponse(content_type='application/pdf')
+#     response['Content-Disposition'] = 'filename="report.pdf"'
+#     template = get_template(template_path)
+#     html = template.render(context)
+#     pisa_status = pisa.CreatePDF(
+#         html.encode('UTF-8'), dest=response, encoding='UTF-8', link_callback=link_callback)
+#     if pisa_status.err:
+#         return HttpResponse('We had some errors <pre>' + html + '</pre>')
+#     return response
+
+
 
 # def chatbot_view(request):
 #     print(request)
