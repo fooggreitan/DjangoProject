@@ -3,16 +3,17 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from app.models import CustomUser, Staff, Task, Staff_Notification, Attendance_Report
 from django.contrib import messages
-
+import google.generativeai as genai
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.views.generic import ListView
 from app.models import Customer
-
 from openai import ChatCompletion
 import openai
+
+import os
 
 
 @login_required(login_url='/')
@@ -175,7 +176,7 @@ def ADD_REPORT(request):
     report = Attendance_Report.objects.all()
     staff = Staff.objects.all()
 
-    response = 'Привет'
+    response = "f"
 
     content = {
         "content": report,
@@ -193,70 +194,145 @@ def chatbot_view(request, *args, **kwargs):
         select_report_type = request.POST.get('select_type_report')
         select_type_staff = request.POST.get('select_type_staff')
 
+        select_type_staff_split = select_type_staff.split()
+
         # user_input = request.POST.get('textPostSelect')
         # print(user_input)
 
         customer = ""
-        staff = Customer.objects.values('name')
-        for i in staff: customer += i['name']
+
+        staff = CustomUser.objects.filter(
+            id__in=Staff.objects.values_list('admin_id', flat=True)
+        ).values('first_name', 'last_name')
+
+        for i in staff:
+            customer += "{0} {1} \n".format(i['first_name'], i['last_name'])
 
         print(customer)
         print(select_report_type)
         print(select_type_staff)
 
         if select_report_type != 'Отчёт не выбран':
-            prompts = []
 
-            '''Начальный системный промт'''
+            genai.configure(api_key="AIzaSyDRK2DTmNY61tutvN2n_W51O0diOrr5ulU")
 
-            prompts.append({"role": "system", "content": """
-                Ты являешься ботом который формирует отчёты от третьего лица (от лица компании Эркью)
-                Ты должен следовать всем требованиям формирования отчётов для эффективности и контроля
-                работы сотрудников организации. Вывод информации должен содержать только основную часть успехов
-                сорудников, ошибок сотрудников и рекомендации по улучшению их работы.
-            """})
+            generation_config = {
+                "temperature": 0.9,
+                "top_p": 1,
+                "top_k": 1,
+                "max_output_tokens": 2048,
+            }
 
-            '''Промт сотрудника за месяц'''
+            safety_settings = [
+                {
+                    "category": "HARM_CATEGORY_HARASSMENT",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                },
+                {
+                    "category": "HARM_CATEGORY_HATE_SPEECH",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                },
+                {
+                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                },
+                {
+                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                },
+            ]
 
-            if select_type_staff == "Сотрудник не выбран":
-                prompts.append({"role": "user", "content": "Cделай {0} включая каждого сотрудников {1}".format(
-                    select_report_type,
-                    customer
-                )})
-            else:
-                prompts.append({"role": "user", "content": "Cделай {0} по сотруднику {1}".format(
-                    select_report_type,
-                    select_type_staff
-                )})
-
-            # Append conversation messages to prompts
-            # prompts.extend(conversation)
-
-            # Set up and invoke the ChatGPT model
-
-            response = openai.ChatCompletion.create(
-                model="ft:gpt-3.5-turbo-0613:personal::7wZAALHG",
-                messages=prompts,
-                api_key="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",
-                max_tokens=1200,
-                temperature=0.2,
-                top_p=1,
-                frequency_penalty=0.5,
-                presence_penalty=0.5
+            model = genai.GenerativeModel(
+                model_name="gemini-1.0-pro",
+                generation_config=generation_config,
+                safety_settings=safety_settings
             )
 
-            res_Bot = response['choices'][0]['message']['content']
+            '''ChatGTP'''
+            # prompts = []
 
-            print(res_Bot)
+            # '''Начальный системный промт'''
+            #
+            # prompts.append({"role": "system", "content": """
+            #     Ты являешься ботом который формирует отчёты от третьего лица (от лица компании Эркью)
+            #     Ты должен следовать всем требованиям формирования отчётов для эффективности и контроля
+            #     работы сотрудников организации. Вывод информации должен содержать заголовки [Успехи:], [Ошибки:], [Рекомендации по улучшению работы:], [Общий комментарий:].
+            # """})
+            #
+            # '''Промт сотрудника за месяц'''
+            #
+            # if select_type_staff == "Сотрудник не выбран":
+            #     prompts.append({"role": "user", "content": "Cделай {0} включая каждого сотрудников {1}".format(
+            #         select_report_type,
+            #         customer
+            #     )})
+            # else:
+            #     prompts.append({"role": "user", "content": "Cделай {0} по сотруднику {1}".format(
+            #         select_report_type,
+            #         select_type_staff
+            #     )})
+
+            # response = openai.ChatCompletion.create(
+            #     model="ft:gpt-3.5-turbo-0613:personal::7wZAALHG",
+            #     messages=prompts,
+            #     api_key="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",
+            #     max_tokens=1200,
+            #     temperature=0.2,
+            #     top_p=1,
+            #     frequency_penalty=0.5,
+            #     presence_penalty=0.5
+            # )
 
             '''' Создание отчёта'''
 
-            add_new_report = Attendance_Report(
-                name_report=select_report_type,
-                description=res_Bot
-            )
+            if select_type_staff == "Сотрудник не выбран":
+
+                prompt_parts = [
+                    """
+                    \nТы являешься ботом который формирует отчёт {0} от третьего лица (от лица компании Эркью) по сотрудникам: {1} и нужно описать поддробно и ФИО сотрудника не нужно выделять жирным шрифтом.
+                    \nТы должен следовать всем требованиям формирования отчётов для эффективности и контроля сотрудников организации.
+                    \nВ отчёте должно содержаться длинная информация о сотруднике.
+                    \nОтчёт содержит заголовки: **Успехи:**, **Ошибки:**, **Рекомендации по улучшению работы:** и **Общий комментарий:**.
+                    \nИнформация в заголовках **Успехи:**, **Ошибки:**, **Рекомендации по улучшению работы:** и **Общий комментарий:** подробно описана.\n\n\n
+                    """.format(select_report_type, customer),
+                ]
+
+                print(prompt_parts)
+
+                response = model.generate_content(prompt_parts)
+
+                add_new_report = Attendance_Report(
+                    name_report=select_report_type,
+                    description=response.text
+                )
+            else:
+
+                prompt_parts = [
+                    """
+                    \nТы являешься ботом который формирует отчёт {0} от третьего лица (от лица компании Эркью) по сотруднику {1}.
+                    \nТы должен следовать всем требованиям формирования отчётов для эффективности и контроля.
+                    \nВ отчёте должно содержаться длинная информация о сотруднике.
+                    \nОтчёт содержит заголовки: **Успехи:**, **Ошибки:**, **Рекомендации по улучшению работы:** и **Общий комментарий:**.
+                    \nИнформация в заголовках **Успехи:**, **Ошибки:**, **Рекомендации по улучшению работы:** и **Общий комментарий:** подробно описана.\n\n\n
+                    """.format(select_report_type, select_type_staff),
+                ]
+
+                response = model.generate_content(prompt_parts)
+
+                staff_add = CustomUser.objects.filter(
+                    first_name=select_type_staff_split[0],
+                    last_name=select_type_staff_split[1]
+                ).values_list("id", flat=True)[0]
+
+                add_new_report = Attendance_Report(
+                    name_report=select_report_type,
+                    description=response.text,
+                    staff_id=str(staff_add)
+                )
+
             add_new_report.save()
-            prompts.clear()
+
+            # prompt_parts.clear()
 
             messages.success(request, "Вы успешно создали отчёт!")
             return redirect('add_report')
@@ -316,13 +392,13 @@ def DELETEPDF(request, id):
     messages.success(request, "Успешно удален!")
     return redirect('add_report')
 
+
 import os
 from django.conf import settings
 from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.contrib.staticfiles import finders
-
 
 # def link_callback(uri, rel):
 #     """
@@ -380,9 +456,52 @@ from django.template.loader import get_template
 
 def app_render_pdf_view(request, id):
     data = Attendance_Report.objects.get(id=id)
+
+    json_dict = {
+        "progress" : '',
+        'error': '',
+        'recommendations': '',
+        'comment': ''
+    }
+
+    import re
+
+    dict = re.sub('\d', '', Attendance_Report.objects.filter(id=id).values('description')[0].get('description')).replace('\n', ' ').split("  ")
+
+    for i in range(len(dict)):
+        if dict[i] == '**Успехи:**':
+            json_dict['progress'] = dict[i + 1].replace('.', '.\n')
+        elif dict[i] == '**Ошибки:**':
+            json_dict['error'] = dict[i + 1].replace('.', '.\n')
+        elif dict[i] == '**Рекомендации по улучшению работы:**':
+            json_dict['recommendations'] = dict[i + 1].replace('.', '.\n')
+        elif dict[i] == '**Общий комментарий:**':
+            json_dict['comment'] = dict[i + 1].replace('.', '.\n')
+
+    print(json_dict)
+
+    # for i in range(3):
+    #     res = Attendance_Report.objects.filter(id=id).values('description')[0].get('description').replace('*', '').replace('\n', ' ').replace(':', '').split("[")[1:][i].split(']')
+    #     dict[res[0]] = res[1]
+
+    username = CustomUser.objects.filter(
+        id__in=Attendance_Report.objects.filter(id=id).values_list(
+            'staff_id', flat=True
+        )).values(
+        'first_name', 'last_name'
+    )
+
+    print("username: {0}".format(username))
+
     template = get_template('pdf2.html')
-    html = template.render({'pdf': data})
-    pdf = pdfkit.from_string(html, False, options = {
+    content = {
+        'pdf': data,
+        "username": username,
+        "dict": json_dict
+    }
+
+    html = template.render(content)
+    pdf = pdfkit.from_string(html, False, options={
         'encoding': "UTF-8",
         "enable-local-file-access": ""
     })
@@ -403,7 +522,6 @@ def app_render_pdf_view(request, id):
 #     if pisa_status.err:
 #         return HttpResponse('We had some errors <pre>' + html + '</pre>')
 #     return response
-
 
 
 # def chatbot_view(request):

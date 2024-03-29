@@ -58,18 +58,17 @@ class Attendance(models.Model):
     def __str__(self):
         return self.staff_id.name
 
-
 class Attendance_Report(models.Model):
     # staff_id = models.ForeignKey(Staff, on_delete=models.DO_NOTHING)
     # task_id = models.ForeignKey(Task, on_delete=models.DO_NOTHING)
 
     # new_id = models.ForeignKey (Staff, on_delete=models.DO_NOTHING, primary_key=True, unique=True)
 
-    admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     name_report = models.CharField(max_length=200)
     description = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    staff = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.name_report

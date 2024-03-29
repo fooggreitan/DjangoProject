@@ -15,6 +15,9 @@
         h2 {
             text-align: center
         }
+        h3 {
+            text-align: center
+        }
     </style>
 </head>
 <body>
@@ -28,8 +31,12 @@
             <h2>{{pdf.name_report}}</h2>
             <p>
                 <b>Дата:</b> {{pdf.created_at}}<br>
-                <b>Сотрудник:</b> {{pdf.}}<br>
-                <b>Должность:</b> {{pdf.}}
+
+                {% for i in username %}
+                <b>Сотрудник:</b> {{i.first_name}}&nbsp;{{i.last_name}}<br>
+                {% endfor %}
+
+                <b>Должность:</b>
             </p>
         </div>
     </div>
@@ -37,11 +44,16 @@
     <div class="headerSection">
         <div class="issuedTo">
             <h3>Описание</h3>
-            <p>
-                {% spaceless %}
-                {{pdf.description|linebreaks}}
-                {% endspaceless %}
-            </p>
+
+            <h4>Успехи:</h4>
+            <p>{{dict.progress|linebreaks}}</p>
+            <h4>Ошибки:</h4>
+            <p>{{dict.error|linebreaks}}</p>
+            <h4>Рекомендации по улучшению работы:</h4>
+            <p>{{dict.recommendations|linebreaks}}</p>
+            <h4>Общий комментарий:</h4>
+            <p>{{dict.comment|linebreaks}}</p>
+
         </div>
         <div>
             <p>

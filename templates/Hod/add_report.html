@@ -26,7 +26,10 @@
                         <tr>
 <!--                            <th>ID</th>-->
                             <th>Название</th>
-                            <th>Дата добавления</th>
+                            <th>Ответственный</th>
+                            <th>Участник</th>
+
+                            <th>Дата создания</th>
                             <th>Дата изменения</th>
                             <th class="text-right">Действия</th>
                         </tr>
@@ -49,6 +52,14 @@
                             <!--                            </td>-->
 
                             <td>{{i.name_report}}</td>
+                            <th>{{user.first_name}}&nbsp;{{user.last_name}}</th>
+
+                            {% if i.staff_id == None %}
+                            <th>Все сотрудники</th>
+                            {% else %}
+                            <th>{{i.staff_id}}</th>
+                            {% endif %}
+
                             <td>{{i.created_at}}</td>
                             <td>{{i.updated_at}}</td>
 
