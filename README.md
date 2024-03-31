@@ -230,3 +230,14 @@ https://ai.google.dev/docs/prompt_best_practices?hl=ru
 
 ````
 
+
+Регулярные выражения в Python от простого к сложному. Подробности, примеры, картинки, упражнения
+https://habr.com/ru/articles/349860/
+Python – конвертировать список словарей в JSON
+https://www.geeksforgeeks.org/python-convert-list-of-dictionaries-to-json/
+Встроенные типы 
+https://docs.python.org/3/library/stdtypes.html
+Как Фильтровать Наборы Запросов Django — 15 Примеров Для Начинающих
+https://ctrlzblog.com/django-queryset-filter-15-examples/
+
+

@@ -201,9 +201,7 @@ def chatbot_view(request, *args, **kwargs):
 
         customer = ""
 
-        staff = CustomUser.objects.filter(
-            id__in=Staff.objects.values_list('admin_id', flat=True)
-        ).values('first_name', 'last_name')
+        staff = CustomUser.objects.filter(id__in=Staff.objects.values_list('admin_id', flat=True)).values('first_name', 'last_name')
 
         for i in staff:
             customer += "{0} {1} \n".format(i['first_name'], i['last_name'])
