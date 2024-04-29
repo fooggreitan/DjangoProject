@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="content container-fluid">
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h3 class="page-title">Cоздание отчёта</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'hod_home' %}">Панель управления</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'add_report' %}">Отчётность</a></li>
+                    <li class="breadcrumb-item active">Cоздание отчёта</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-body">
+                <form action="{% url 'chatbot_view' %}" method="POST">{% csrf_token %}
+                    <div class="row">
+                        <div class="col-12 col-sm-6">
+                            <div class="form-group">
+                                <label>Выбор отчёта</label>
+                                <select name="select_type_report" class="form-control">
+                                    <option>Отчёт не выбран</option>
+                                    <option>Отчет о проделанной работе за месяц</option>
+                                    <option>Отчет о проделанной работе за день</option>
+                                    <option>Отчет о проделанной работе за неделю</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <div class="form-group">
+                                <label>Выбор сотрудника</label>
+                                <select name="select_type_staff" class="form-control">
+                                    <option>Сотрудник не выбран</option>
+                                    {% for i in staff %}
+                                    <option>{{i.first_name}}&nbsp;{{i.last_name}} ({{i.WORK_POSITION}})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <div class="form-group">
+                                <label>Выбор отдела</label>
+                                <select name="select_departament" class="form-control">
+                                    <option>Отдел не выбран</option>
+                                    <option>Отдел управления ИТ-проектами</option>
+                                    <option>Отдел разработки</option>
+                                    <option>Отдел продвижения</option>
+                                    <option>Отдел поддержки клиентов</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                                <input type="submit" class="btn btn-outline-secondary mb-4"
+                                       value="Сгенерировать отчёт">
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label>Вывод AI</label>
+                                <textarea name="textPostSelect" class="form-control" id=""
+                                          rows="10">{{response}}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-body">
+                <form action="{% url 'create_new_report' %}" method="POST">{% csrf_token %}
+
+                    <input type="hidden" name="staff_id" value="{{ staff_id }}">
+                    <input type="hidden" name="select_type_staff" value="{{ select_type_staff }}">
+                    <input type="hidden" name="select_report_type" value="{{ select_report_type }}">
+                    <input type="hidden" name="description" value="{{ description }}">
+
+                    <div class="row">
+                        <div class="col-12 col-sm-6">
+                            <div class="form-group">
+                                <label>Успехи</label>
+                                <textarea name="ex1" class="form-control" id="ex1" rows="5">{{progress}}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <div class="form-group">
+                                <label>Ошибки</label>
+                                <textarea name="ex2" class="form-control" id="ex2" rows="5">{{errors}}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <div class="form-group">
+                                <label>Рекомендации по улучшению работы</label>
+                                <textarea name="ex3" class="form-control" id="ex3" rows="5">{{recommendations}}</textarea>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="form-group">
+                                <label>Общий комментарий</label>
+                                <textarea name="ex4" class="form-control" id="ex4" rows="5">{{comment}}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label>Возможные риски</label>
+                                <textarea name="ex5" class="form-control" id="ex5" rows="5">{{risks}}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-2">
+                            <div class="form-group">
+                                <input type="submit" class="btn btn-outline-secondary btn-block mb-2"
+                                       value="Cоздать отчёт">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

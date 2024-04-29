@@ -438,16 +438,16 @@ button.bg-danger:hover {
     color: #757575 !important;
 }
 .btn-primary {
-	background-color: #FFBC53;
-	border: 1px solid #FFBC53;
+	background-color: #25364b;
+	border: 1px solid #25364b;
 }
 .btn-primary:hover,
 .btn-primary:focus,
 .btn-primary.active,
 .btn-primary:active,
 .open > .dropdown-toggle.btn-primary {
-	background-color: #18aefa;
-	border: 1px solid #18aefa;
+	background-color: #597ca7;
+	border: 1px solid #597ca7a;
 }
 .btn-primary.active.focus,
 .btn-primary.active:focus,
@@ -458,14 +458,14 @@ button.bg-danger:hover {
 .open > .dropdown-toggle.btn-primary.focus,
 .open > .dropdown-toggle.btn-primary:focus,
 .open > .dropdown-toggle.btn-primary:hover {
-	background-color: #18aefa;
-	border: 1px solid #18aefa;
+	background-color: #597ca7;
+	border: 1px solid #597ca7;
 }
 .btn-primary.active:not(:disabled):not(.disabled),
 .btn-primary:active:not(:disabled):not(.disabled),
 .show > .btn-primary.dropdown-toggle {
-	background-color: #18aefa;
-	border-color: #18aefa;
+	background-color: #597ca7;
+	border-color: #597ca7;
 	color: #fff;
 }
 .btn-primary.active:focus:not(:disabled):not(.disabled),
@@ -477,6 +477,9 @@ button.bg-danger:hover {
     background-color: #FFBC53;
     border-color: #FFBC53;
     color: #fff;
+}
+.zero-rows {
+    background-color: red; /* Любой цвет фона для строк с нулевыми значениями */
 }
 .btn-secondary.active:focus:not(:disabled):not(.disabled),
 .btn-secondary:active:focus:not(:disabled):not(.disabled),
@@ -1859,7 +1862,7 @@ footer p {
 }
 .login-wrapper .loginbox .login-left {
     align-items: center;
-    background: #18aefa;
+    background: #25364b;
     /*background-image: url(../img/login.jpg);*/
     border-radius: 6px 0 0 6px;
     flex-direction: column;

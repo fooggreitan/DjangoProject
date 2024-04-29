@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="utf-8">
+    <title>Milky - Dairy Website Template</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+</head>
+
+<body>
+<!-- Navbar Start -->
+<nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top px-4 px-lg-5">
+    <img style="max-width: 200px; height: auto;" src="{% static 'img/Logo.jpg' %}" alt="Image">
+    <button type="button" class="navbar-toggler me-0" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <div class="ms-auto border-start pe-4 d-none d-lg-block">
+            <button type="button" class="btn btn-sm p-2"><i class="fa fa-search"></i></button>
+        </div>
+    </div>
+</nav>
+
+<!-- Navbar End -->
+
+
+<!-- Carousel Start -->
+<div class="container-fluid px-0 mb-5">
+    <div id="header-carousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img style="max-width: 100%; height: auto;"
+                     src="https://g.foolcdn.com/editorial/images/598948/several-wind-turbines-in-a-field-with-a-bright-sun-in-the-background.jpg"
+                     alt="Image">
+                <div class="carousel-caption">
+
+                </div>
+            </div>
+            <div class="carousel-item">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Carousel End -->
+
+
+<!-- About Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-5 align-items-end">
+            <div class="text-content">
+                <p>Хотите внести свой вклад в защиту окружающей среды и сэкономить на энергозатратах? Переходите на
+                    ветроэнергетику! Ветряные установки – это эффективный и экологически чистый источник энергии,
+                    который не
+                    загрязняет атмосферу и не истощает природные ресурсы. Присоединяйтесь к мировому движению в сторону
+                    устойчивого развития и начните использовать ветроэнергию уже сегодня! Вместе мы можем сделать наш
+                    мир
+                    чище и зеленее. Доверьтесь силе ветра для вашего будущего!</p>
+                <p>Если вы хотите узнать, в каком районе Якутии лучше разместить ветряные мельницы для получения
+                    экологически чистой энергии, существует интерактивная карта. Чтобы использовать ее, просто кликните
+                    на
+                    интересующий вас район, и узнаете информацию о плюсах и минусах размещения ветряных мельниц в данной
+                    местности.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- About End -->
+
+
+<!-- About Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-5 align-items-end">
+            <div id="map"></div>
+        </div>
+    </div>
+</div>
+
+<!-- About End -->
+<div class="container-xxl py-5">
+    <div class="container">
+        {% for i in data %}
+        <textarea class="form-control" rows="3">{{i.lng}}</textarea>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Footer Start -->
+<div class="container-fluid bg-dark footer mt-5 py-5 wow fadeIn" data-wow-delay="0.1s">
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-lg-9 col-md-6">
+                <h5 class="text-white mb-4">О нас</h5>
+                <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
+                <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@example.com</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Footer End -->
+
+<!-- Back to Top -->
+<a href="#" class="btn btn-lg btn-primary btn-lg-square rounded-circle back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+</body>
+</html>

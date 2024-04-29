@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os.path
 from pathlib import Path
+import django_extensions
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 
@@ -26,7 +30,7 @@ SECRET_KEY = "django-insecure-i2el9j*f(v_r2vhv_4hfd==f4t44=4uie+&i%8_k@gx_*j+)p%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 INSTALLED_APPS = [
@@ -39,9 +43,8 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "app",
     "active_link",
-    "projectname_app"
-    # "qualifier.apps.ClubConfig",
-    # "qualifier.apps.DefaultRouter"
+    "projectname_app",
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -78,28 +81,26 @@ WSGI_APPLICATION = "projectname_app.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": BASE_DIR / "db.sqlite3",
-    # }
-
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "newproject",
-        'USER': 'postgres',
-        'PASSWORD': 'Vvhfddrvgd123+',
-        'HOST': '127.0.0.1',
-        'PORT': 5432
+        "ENGINE": os.environ.get("POSTGRES_ENGINE", "django.db.backends.postgresql"),
+        "NAME": os.environ.get("POSTGRES_DB", "newproject"),
+        'USER': os.environ.get("POSTGRES_USER", "postgres"),
+        'PASSWORD': os.environ.get("POSTGRES_PASSWORD", "Vvhfddrvgd123+"),
+        'HOST': os.environ.get("POSTGRES_HOST", "127.0.0.1"),
+        'PORT': os.environ.get("POSTGRES_PORT", "5432"),
     }
-
-    # 'club_db': {
-    #     'NAME': 'qualifier',
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'USER': 'postgres',
-    #     'PASSWORD': 'Vvhfddrvgd123+',
-    #     'PORT': 5432
-    # }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": os.environ.get("POSTGRES_ENGINE"),
+#         "NAME": os.environ.get("POSTGRES_DB"),
+#         'USER': os.environ.get("POSTGRES_USER"),
+#         'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
+#         'HOST': os.environ.get("POSTGRES_HOST"),
+#         'PORT': os.environ.get("POSTGRES_PORT"),
+#     }
+# }
 
 # DATABASE_ROUTERS = ['routers.db_routers.ClubRouter']
 

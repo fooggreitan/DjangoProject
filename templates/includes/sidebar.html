@@ -9,7 +9,8 @@
                     <span>Главное меню</span>
                 </li>
                 <li class="{% active_link 'hod_home' 'active' %}">
-                    <a href="{% url 'hod_home' %}"><i class="fas fa-holly-berry"></i> <span>Панель управления менеджера</span></a>
+                    <a href="{% url 'hod_home' %}"><i class="fas fa-holly-berry"></i>
+                        <span>Панель управления</span></a>
                 </li>
 
                 <!--                <li class="submenu">-->
@@ -23,7 +24,6 @@
                 <!--                </li>-->
 
 
-
                 <!--<li class="submenu">
                    <a href="#"><i class="fas fa-chalkboard-teacher"></i> <span> Клиенты</span> <span class="menu-arrow"></span></a>
                    <ul>
@@ -33,49 +33,80 @@
                       <li><a href="edit-teacher.html">Клиенты Edit</a></li>
                    </ul>
                 </li>-->
-<!--                <li class="submenu">-->
-<!--                    <a href="#"><i class="fas fa-building"></i> <span> Задачи</span> <span-->
-<!--                            class="menu-arrow"></span></a>-->
-<!--                    <ul>-->
-<!--                        <li><a href="{% url 'view_task' %}">Задачи List</a></li>-->
-<!--                        <li><a href="add-department.html">Задачи Add</a></li>-->
-<!--                        <li><a href="edit-department.html">Задачи Edit</a></li>-->
-<!--                    </ul>-->
-<!--                </li>-->
-<!--                <li>-->
-<!--                    <a href="holiday.html"><i class="fas fa-holly-berry"></i> <span>Активность сотрдников</span></a>-->
-<!--                </li>-->
-                <li>
-                    <a href="{% url 'add_report' %}"><i class="fas fa-file-alt"></i> <span>Aналитика</span></a>
+                <!--                <li class="submenu">-->
+                <!--                    <a href="#"><i class="fas fa-building"></i> <span> Задачи</span> <span-->
+                <!--                            class="menu-arrow"></span></a>-->
+                <!--                    <ul>-->
+                <!--                        <li><a href="{% url 'view_task' %}">Задачи List</a></li>-->
+                <!--                        <li><a href="add-department.html">Задачи Add</a></li>-->
+                <!--                        <li><a href="edit-department.html">Задачи Edit</a></li>-->
+                <!--                    </ul>-->
+                <!--                </li>-->
+                <!--                <li>-->
+                <!--                    <a href="holiday.html"><i class="fas fa-holly-berry"></i> <span>Активность сотрдников</span></a>-->
+                <!--                </li>-->
+                <li class="{% active_link 'add_report' 'active' %}">
+                    <a href="{% url 'add_report' %}"><i class="fas fa-file-alt"></i> <span>Отчётность</span></a>
                 </li>
-                <li>
-                    <a href="{% url 'staff_send_notification' %}"><i class="fas fa-bell"></i> <span>Уведомления</span></a>
-                </li>
+                <!--                <li>-->
+                <!--                    <a href="{% url 'staff_send_notification' %}"><i class="fas fa-bell"></i> <span>Уведомления</span></a>-->
+                <!--                </li>-->
 
-                <li class="submenu {% active_link 'view_staff' 'active' %}">
-                    <a href="#"><i class="fas fa-user-graduate"></i> <span> Сотрудники</span> <span
+                <li class="submenu {% active_link 'view_case||view_deal' 'active' %}">
+                    <a href="#"><i class="fa fa-binoculars"></i> <span> Аналитика </span> <span
                             class="menu-arrow"></span></a>
                     <ul>
-                        <!--                    <li><a href="students.html">Student List</a></li>-->
-                        <li><a href="{% url 'view_staff' %}">Сотрудники View</a></li>
-                        <!--                    <li><a href="{% url 'add_staff' %}">Сотрудники Add</a></li>-->
-                        <!--                    <li><a href="">Сотрудники Edit</a></li>-->
+                        <li>
+                            <a href="{% url 'callControl_view' %}"><i class=""></i> <span>Звонки</span></a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'taskControl_view' %}"><i class=""></i> <span>Задачи</span></a>
+                        </li>
+<!--                        <li>-->
+<!--                            <a href="{% url 'view_deal' %}"><i class=""></i> <span>Cделки</span></a>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <a href="{% url 'view_case' %}"><i class=""></i> <span>Дела</span></a>-->
+<!--                        </li>-->
                     </ul>
                 </li>
 
-<!--                <li class="menu-title">-->
-<!--                    <span>Главное меню</span>-->
-<!--                </li>-->
+                <li class="submenu {% active_link 'timeControl_view' 'active' %}">
+                    <a href="#"><i class="fa fa-address-book" aria-hidden="true"></i> <span> Трудовая дисциплина </span> <span
+                            class="menu-arrow"></span></a>
+                    <ul>
+                        <li>
+                            <a href="{% url 'timeControl_view' %}"><i class=""></i> <span>Рабочее время</span></a>
+                        </li>
+                    </ul>
+                </li>
 
-<!--                <li>-->
-<!--                    <a href="{% url 'add_report' %}"><i class="fas fa-file-alt"></i> <span>Aналитика</span></a>-->
-<!--                </li>-->
-<!--                <li>-->
-<!--                    <a href="{% url 'staff_send_notification' %}"><i class="fas fa-bell"></i> <span>Уведомления</span></a>-->
-<!--                </li>-->
-<!--                <li>-->
-<!--                    <a href="{% url 'staff_send_notification' %}"><i class="fas fa-bell"></i> <span>Уведомления</span></a>-->
-<!--                </li>-->
+                <li class="submenu {% active_link 'view_staff' 'active' %}">
+                    <a href="#"><i class="fa fa-users"></i> <span> Сотрудники</span> <span
+                            class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{% url 'view_staff' %}">Сотрудники View</a></li>
+                    </ul>
+                </li>
+
+                <li class="{% active_link 'add_bitrix24' 'active' %}">
+                    <a href="{% url 'add_bitrix24' %}"><i class="fa fa-cogs"></i> <span>Настройки</span></a>
+                </li>
+
+                <!--                <li class="menu-title">-->
+                <!--                    <span>Главное меню</span>-->
+                <!--                </li>-->
+
+                <!--                <li>-->
+                <!--                    <a href="{% url 'add_report' %}"><i class="fas fa-file-alt"></i> <span>Aналитика</span></a>-->
+                <!--                </li>-->
+                <!--                <li>-->
+                <!--                    <a href="{% url 'staff_send_notification' %}"><i class="fas fa-bell"></i> <span>Уведомления</span></a>-->
+                <!--                </li>-->
+                <!--                <li>-->
+                <!--                    <a href="{% url 'staff_send_notification' %}"><i class="fas fa-bell"></i> <span>Уведомления</span></a>-->
+                <!--                </li>-->
 
                 <!--<li><i class=""></i>
                     <a href="{% url 'logout' %}"><i class="fas fa-holly-berry"></i> <span>Выход</span></a>
@@ -88,7 +119,32 @@
                 </li>
 
                 <li class="{% active_link 'hod_home' 'active' %}">
-                    <a href="{% url 'hod_home' %}"><i class="fas fa-holly-berry"></i> <span>Панель управления</span></a>
+                    <a href="{% url 'staff_home' %}"><i class="fas fa-holly-berry"></i>
+                        <span>Панель управления</span></a>
+                </li>
+
+                <li class="submenu {% active_link 'view_case||view_deal' 'active' %}">
+                    <a href="#"><i class="fa fa-binoculars"></i> <span> Эффективность </span> <span
+                            class="menu-arrow"></span></a>
+                    <ul>
+                        <li>
+                            <a href="{% url 'timeControl_view' %}"><i class=""></i> <span>Рабочее время</span></a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'callControl_view' %}"><i class=""></i> <span>Звонки</span></a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'taskControl_view' %}"><i class=""></i> <span>Задачи</span></a>
+                        </li>
+                        <li>
+                            <a href="{% url 'view_case' %}"><i class=""></i> <span>Дела</span></a>
+                        </li>
+                        <li>
+                            <a href="{% url 'view_deal' %}"><i class=""></i> <span>Cделки</span></a>
+                        </li>
+                    </ul>
                 </li>
 
                 <li class="{% active_link '' 'active' %}">
@@ -106,16 +162,16 @@
                 <!--                    </ul>-->
                 <!--                </li>-->
 
-<!--                <li class="submenu {% active_link 'view_staff' 'active' %}">-->
-<!--                    <a href="#"><i class="fas fa-user-graduate"></i> <span> Сотрудники</span> <span-->
-<!--                            class="menu-arrow"></span></a>-->
-<!--                    <ul>-->
-<!--                        &lt;!&ndash;                    <li><a href="students.html">Student List</a></li>&ndash;&gt;-->
-<!--                        <li><a href="{% url 'view_staff' %}">Сотрудники View</a></li>-->
-<!--                        &lt;!&ndash;                    <li><a href="{% url 'add_staff' %}">Сотрудники Add</a></li>&ndash;&gt;-->
-<!--                        &lt;!&ndash;                    <li><a href="">Сотрудники Edit</a></li>&ndash;&gt;-->
-<!--                    </ul>-->
-<!--                </li>-->
+                <!--                <li class="submenu {% active_link 'view_staff' 'active' %}">-->
+                <!--                    <a href="#"><i class="fas fa-user-graduate"></i> <span> Сотрудники</span> <span-->
+                <!--                            class="menu-arrow"></span></a>-->
+                <!--                    <ul>-->
+                <!--                        &lt;!&ndash;                    <li><a href="students.html">Student List</a></li>&ndash;&gt;-->
+                <!--                        <li><a href="{% url 'view_staff' %}">Сотрудники View</a></li>-->
+                <!--                        &lt;!&ndash;                    <li><a href="{% url 'add_staff' %}">Сотрудники Add</a></li>&ndash;&gt;-->
+                <!--                        &lt;!&ndash;                    <li><a href="">Сотрудники Edit</a></li>&ndash;&gt;-->
+                <!--                    </ul>-->
+                <!--                </li>-->
 
                 <!--<li class="submenu">
                    <a href="#"><i class="fas fa-chalkboard-teacher"></i> <span> Клиенты</span> <span class="menu-arrow"></span></a>
@@ -127,21 +183,19 @@
                    </ul>
                 </li>-->
 
-<!--                <li class="submenu">-->
-<!--                    <a href="#"><i class="fas fa-building"></i> <span> Задачи </span> <span-->
-<!--                            class="menu-arrow"></span></a>-->
-<!--                    <ul>-->
-<!--                        <li><a href="departments.html">Список задач</a></li>-->
-<!--                        <li><a href="add-department.html">Выполняемые задачи</a></li>-->
-<!--                        <li><a href="edit-department.html">Невыполняемые задачи</a></li>-->
-<!--                    </ul>-->
-<!--                </li>-->
-<!--                <li>-->
-<!--                    <a href="{% url 'view_attendance' %}"><i class="fas fa-holly-berry"></i> <span>Посещаемость</span></a>-->
-<!--                </li>-->
-                <li>
-                    <a href="holiday.html"><i class="fas fa-holly-berry"></i> <span>Аналитика</span></a>
-                </li>
+                <!--                <li class="submenu">-->
+                <!--                    <a href="#"><i class="fas fa-building"></i> <span> Задачи </span> <span-->
+                <!--                            class="menu-arrow"></span></a>-->
+                <!--                    <ul>-->
+                <!--                        <li><a href="departments.html">Список задач</a></li>-->
+                <!--                        <li><a href="add-department.html">Выполняемые задачи</a></li>-->
+                <!--                        <li><a href="edit-department.html">Невыполняемые задачи</a></li>-->
+                <!--                    </ul>-->
+                <!--                </li>-->
+                <!--                <li>-->
+                <!--                    <a href="{% url 'view_attendance' %}"><i class="fas fa-holly-berry"></i> <span>Посещаемость</span></a>-->
+                <!--                </li>-->
+
                 <li><i class=""></i>
                     <a href="{% url 'logout' %}"><i class="fas fa-holly-berry"></i> <span>Выход</span></a>
                 </li>

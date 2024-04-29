@@ -1,0 +1,65 @@
+#version: "3.8"
+#services:
+#  django:
+#    build:
+#      context: .
+#    command: sh -c "gunicorn --bind 0.0.0.0:8000 app.wsgi"
+#    expose:
+#      - 8000
+#    volumes:
+#      - .:/app
+#      - static_data:/projectname/static
+#    environment:
+#      - DATABASE_URL=postgresql://postgres:Vvhfddrvgd123+@db:5432/newproject
+#      - DEBUG=1
+#
+#  db:
+#    image: postgres:13-alpine
+#    volumes:
+#      - pg_data:/var/lib/postgresql/data/
+#    expose:
+#      - 5432
+#    environment:
+#      - POSTGRES_DB=postgres
+#      - POSTGRES_USER=Vvhfddrvgd123+
+#      - POSTGRES_PASSWORD=newproject
+#
+#  nginx:
+#    image: nginx:1.19.9-alpine
+#    depends_on:
+#      - django
+#    ports:
+#      - "80:80"
+#    volumes:
+#      - static_data:/var/www/html/static
+#      - ./nginx-conf.d:/etc/nginx/conf.d
+#
+#volumes:
+#  pg_data:
+#  static_data:
+
+version: "3.8"
+services:
+  web:
+    build:
+      context: .
+    ports:
+      - "5000:5000"
+    command: ["sh", "./start.sh"]
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+  db:
+    # Образ и версия базы, которую мы будем использовать
+    image: postgres
+    # Внешний том(volume) и место где он будет подключен внутри контейнера
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data/
+    environment:
+      # Учетные данные, которые можно будет переопределить
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+volumes:
+  postgres_volume:

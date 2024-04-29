@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="content container-fluid">
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h3 class="page-title">Настройки</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'hod_home' %}">Панель управления</a></li>
+                    <li class="breadcrumb-item active">Настройки</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card card-table">
+                <div class="card-body">
+                    <form method="post" action="{% url 'add_bitrix24_new_webhook' %}" enctype="">
+                        {% csrf_token %}
+                        {% for i in webhook %}
+                        <div class="table-responsive">
+                            {% include 'includes/messages.html' %}
+                            <div class="col-12 col-sm">
+                                <div class="form-group">
+                                    <label>Webhook</label>
+                                    <input type="text" class="form-control" name="WEBHOOK" value={{i.webhook}}><br>
+                                    <button href="" class="btn btn-outline-secondary mr-2"><i class=""></i>Cохранить</button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

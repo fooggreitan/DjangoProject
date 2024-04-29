@@ -4,13 +4,14 @@
     <div class="page-header">
       <div class="row">
          <div class="col-sm-12">
-            <h3 class="page-title">Welcome Admin!</h3>
+            <h3 class="page-title">Добро пожаловать {{user.first_name}}&nbsp;{{user.last_name}}</h3>
             <ul class="breadcrumb">
-               <li class="breadcrumb-item active">Dashboard</li>
+               <li class="breadcrumb-item active">Панель управления</li>
             </ul>
          </div>
       </div>
     </div>
+
     <div class="row">
       <div class="col-xl-3 col-sm-6 col-12 d-flex">
          <div class="card bg-one w-100">
@@ -20,7 +21,11 @@
                      <i class="fas fa-chalkboard-teacher"></i>
                   </div>
                   <div class="db-info">
-                     <h3>{{staff_count}}+</h3>
+                     {% if staff_count == 0 %}
+                     <h3>{{staff_count}}</h3>
+                     {% else %}
+                     <h3>{{staff_count}}</h3>
+                     {% endif %}
                      <h6>Сотрудники</h6>
                   </div>
                </div>
@@ -35,8 +40,12 @@
                      <i class="fas fa-crown"></i>
                   </div>
                   <div class="db-info">
-                     <h3></h3>
-                     <h6>Выполняемые задачи</h6>
+                     {% if task_count == 0 %}
+                     <h3>{{task_count}}</h3>
+                     {% else %}
+                     <h3>{{task_count}}</h3>
+                     {% endif %}
+                     <h6>Выполняемые задачи<</h6>
                   </div>
                </div>
             </div>
@@ -50,8 +59,12 @@
                      <i class="fas fa-building"></i>
                   </div>
                   <div class="db-info">
-                     <h3></h3>
-                     <h6>Задачи в процессе</h6>
+                     {% if call_count == 0 %}
+                     <h3>{{call_count}}</h3>
+                     {% else %}
+                     <h3>{{call_count}}</h3>
+                     {% endif %}
+                     <h6>Всего звонков</h6>
                   </div>
                </div>
             </div>
@@ -65,8 +78,12 @@
                      <i class="fas fa-file-invoice-dollar"></i>
                   </div>
                   <div class="db-info">
-                     <h3></h3>
-                     <h6>Невыполняемые задачи</h6>
+                     {% if report_count == 0 %}
+                     <h3>{{report_count}}</h3>
+                     {% else %}
+                     <h3>{{report_count}}</h3>
+                     {% endif %}
+                     <h6>Всего созданных отчётов</h6>
                   </div>
                </div>
             </div>
@@ -79,16 +96,16 @@
             <div class="card-header">
                <div class="row align-items-center">
                   <div class="col-6">
-                     <h5 class="card-title">Revenue</h5>
+                     <h5 class="card-title">Отношение</h5>
                   </div>
                   <div class="col-6">
                      <ul class="list-inline-group text-right mb-0 pl-0">
                         <li class="list-inline-item">
                            <div class="form-group mb-0 amount-spent-select">
                               <select class="form-control form-control-sm">
-                                 <option>Today</option>
-                                 <option>Last Week</option>
-                                 <option>Last Month</option>
+                                 <option>Cегодня</option>
+                                 <option>В прошлом недели</option>
+                                 <option>В прошлом месяце</option>
                               </select>
                            </div>
                         </li>
@@ -106,16 +123,16 @@
             <div class="card-header">
                <div class="row align-items-center">
                   <div class="col-6">
-                     <h5 class="card-title">Number of Students</h5>
+                     <h5 class="card-title">Производительность</h5>
                   </div>
                   <div class="col-6">
                      <ul class="list-inline-group text-right mb-0 pl-0">
                         <li class="list-inline-item">
                            <div class="form-group mb-0 amount-spent-select">
                               <select class="form-control form-control-sm">
-                                 <option>Today</option>
-                                 <option>Last Week</option>
-                                 <option>Last Month</option>
+                                 <option>Cегодня</option>
+                                 <option>В прошлом недели</option>
+                                 <option>В прошлом месяце</option>
                               </select>
                            </div>
                         </li>
@@ -133,7 +150,7 @@
       <div class="col-md-6 d-flex">
          <div class="card flex-fill">
             <div class="card-header">
-               <h5 class="card-title">Star Students</h5>
+               <h5 class="card-title">Звездные сотрудники</h5>
             </div>
             <div class="card-body">
                <div class="table-responsive">
@@ -212,7 +229,7 @@
       <div class="col-md-6 d-flex">
          <div class="card flex-fill">
             <div class="card-header">
-               <h5 class="card-title">Student Activity</h5>
+               <h5 class="card-title">Активные сотрудники</h5>
             </div>
             <div class="card-body">
                <ul class="activity-feed">
