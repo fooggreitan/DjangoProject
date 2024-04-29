@@ -35,6 +35,7 @@ Version      : 1.0
 /*-----------------
 	1. General
 -----------------------*/
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700; 1900&display=swap');
 
 html {
 	height: 100%;
@@ -42,7 +43,7 @@ html {
 body {
 	background-color: #fff;
 	color: #333;
-	font-family: 'Poppins', sans-serif;
+	font-family: "Roboto", sans-serif;
 	font-size: 1rem;
 	height: 100%;
 	line-height: 1.5;
@@ -55,7 +56,7 @@ h3,
 h4,
 h5,
 h6 {
-	font-family: 'Poppins', sans-serif;
+	font-family: "Anton", sans-serif;
 	margin-top: 0;
 }
 a:hover,
@@ -437,16 +438,16 @@ button.bg-danger:hover {
     color: #757575 !important;
 }
 .btn-primary {
-	background-color: #FFBC53;
-	border: 1px solid #FFBC53;
+	background-color: #25364b;
+	border: 1px solid #25364b;
 }
 .btn-primary:hover,
 .btn-primary:focus,
 .btn-primary.active,
 .btn-primary:active,
 .open > .dropdown-toggle.btn-primary {
-	background-color: #18aefa;
-	border: 1px solid #18aefa;
+	background-color: #597ca7;
+	border: 1px solid #597ca7a;
 }
 .btn-primary.active.focus,
 .btn-primary.active:focus,
@@ -457,14 +458,14 @@ button.bg-danger:hover {
 .open > .dropdown-toggle.btn-primary.focus,
 .open > .dropdown-toggle.btn-primary:focus,
 .open > .dropdown-toggle.btn-primary:hover {
-	background-color: #18aefa;
-	border: 1px solid #18aefa;
+	background-color: #597ca7;
+	border: 1px solid #597ca7;
 }
 .btn-primary.active:not(:disabled):not(.disabled),
 .btn-primary:active:not(:disabled):not(.disabled),
 .show > .btn-primary.dropdown-toggle {
-	background-color: #18aefa;
-	border-color: #18aefa;
+	background-color: #597ca7;
+	border-color: #597ca7;
 	color: #fff;
 }
 .btn-primary.active:focus:not(:disabled):not(.disabled),
@@ -476,6 +477,9 @@ button.bg-danger:hover {
     background-color: #FFBC53;
     border-color: #FFBC53;
     color: #fff;
+}
+.zero-rows {
+    background-color: red; /* Любой цвет фона для строк с нулевыми значениями */
 }
 .btn-secondary.active:focus:not(:disabled):not(.disabled),
 .btn-secondary:active:focus:not(:disabled):not(.disabled),
@@ -1342,8 +1346,8 @@ div.dataTables_wrapper div.dataTables_info {
 -----------------------*/
 
 .header {
-	background-color: #fff;
-	border-bottom: 1px solid #f3f3f4;
+	background-color: #222e3c;
+	border-bottom: 1px solid #353c58;
 	left: 0;
 	position: fixed;
 	right: 0;
@@ -1359,9 +1363,9 @@ div.dataTables_wrapper div.dataTables_info {
     width: 320px;
     z-index: 1;
     transition: all 0.2s ease-in-out;
-    background-color: #f7f7fa;
-    border-bottom: 1px solid #efefef;
-	border-right: 1px solid #ececf5;
+    background-color: #222E3C;
+    border-bottom: 2px solid #353c58;
+	border-right: 1px solid #222E3C;
     display: flex;
     align-items: center;
 }
@@ -1542,7 +1546,7 @@ html.menu-opened body {
     width: 300px;
 }
 .top-nav-search .form-control {
-    background-color: transparent;
+    /*background-color: transparent;*/
     border-color: rgba(0, 0, 0, 0.1);
     border-radius: 50px;
     color: #ddd;
@@ -1552,7 +1556,7 @@ html.menu-opened body {
 .top-nav-search .btn {
     background-color: transparent;
     border-color: transparent;
-    color: #ffbc53;
+    color: #18AEFA;
     min-height: 40px;
     padding: 7px 15px;
     position: absolute;
@@ -1597,8 +1601,8 @@ footer p {
 -----------------------*/
 
 .sidebar {
-    background-color: #f7f7fa;
-	border-right: 1px solid #ececf5;
+    background-color: #222E3C;
+	border-right: 1px solid #353c58;
     bottom: 0;
     left: 0;
     margin-top: 0;
@@ -1645,8 +1649,8 @@ footer p {
 	padding-left: 30px;
 }
 .sidebar-menu li.active > a {
-    background-color: #fff;
-    color: #18aefa;
+    background-color: #25364B;
+    color: #fff;
     position: relative;
     margin: 0px -15px;
     padding-left: 30px;
@@ -1858,7 +1862,7 @@ footer p {
 }
 .login-wrapper .loginbox .login-left {
     align-items: center;
-    background: #18aefa;
+    background: #25364b;
     /*background-image: url(../img/login.jpg);*/
     border-radius: 6px 0 0 6px;
     flex-direction: column;
@@ -2017,7 +2021,7 @@ footer p {
 	color: #333;
 }
 .user-menu.nav > li > a .badge {
-	background-color: #FFBC53;
+	background-color: #18AEFA;
     display: block;
     font-size: 10px;
     font-weight: bold;
@@ -3198,7 +3202,7 @@ table.table-inbox tbody tr.checked {
 		color: #18aefa;
 	}
 	.user-menu.nav > li > a .badge {
-		background-color: #FFBC53;
+		background-color: #18AEFA;
 		color: #fff;
 	}
 	.user-menu.nav > li > a:hover i, .user-menu.nav > li > a:focus i {

@@ -7,8 +7,11 @@ class UserModel(UserAdmin):
 
 admin.site.register(CustomUser, UserModel)
 admin.site.register(Staff)
+admin.site.register(Deal)
 admin.site.register(Task)
 admin.site.register(Attendance)
 admin.site.register(Attendance_Report)
 admin.site.register(Staff_Notification)
-
+admin.site.register(Customer)
+admin.site.register(TaskControl)
+admin.site.register(TimeControl)

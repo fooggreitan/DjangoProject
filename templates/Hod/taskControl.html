@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="content container-fluid">
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h3 class="page-title">Задачи</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'hod_home' %}">Панель управления</a></li>
+                    <li class="breadcrumb-item active">Задачи</li>
+                </ul>
+            </div>
+            <!--            <div class="col-auto text-right float-right ml-auto">-->
+            <!--                <a href="#" class="btn btn-outline-primary mr-2"><i class="fas fa-download"></i> Дела</a>-->
+            <!--                <a href="{% url 'add_staff' %}" class="btn btn-primary"><i class="fas fa-plus"></i></a>-->
+            <!--            </div>-->
+        </div>
+    </div>
+
+    <form action="{% url 'taskControl_view' %}" method="post">{% csrf_token %}
+        <div class="row">
+            <div class="col-12 col-sm-2">
+                <div class="form-group">
+                    <select name="select_type_report" class="form-control">
+                        <option>Ничего не выбрано</option>
+                        <option value="month">Месяц</option>
+                        <option value="day">День</option>
+                        <option value="week">Неделя</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-sm-2">
+                <div class="form-group">
+                    <input type="submit" class="btn btn-outline-secondary mr-2" value="Применить">
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="row">
+        <div class="col-md-12 col-lg-6">
+            <div class="card card-chart">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-6">
+                            <h5 class="card-title">Аналитика задач</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="char"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 col-lg-6">
+            <div class="card card-chart">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-6">
+                            <h5 class="card-title">Аналитика задач</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="char_task_ana"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-sm-2">
+            <div class="form-group">
+                <input type="submit" id="analyticsBtn" name="table" value="Аналитика"
+                       class="btn btn-outline-secondary mr-2">
+                <input type="submit" id="tasksBtn" name="table" value="Задачи"
+                       class="btn btn-outline-secondary mr-2">
+            </div>
+        </div>
+    </div>
+
+    <div id="analyticsTable" class="row" style="display: none;">
+        <div class="col-sm-12">
+            <div class="card card-table">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        {% include 'includes/messages.html' %}
+                        <table id="table_new" class="table table-hover table-center mb-0">
+                            <thead>
+                            <tr>
+                                <th>Ответственный</th>
+                                <th>Отложенные задачи</th>
+                                <th>Выполняемые задачи</th>
+                                <th>Задачи на переделке</th>
+                                <th>Просроченные задачи</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% if current_user.user_type == '1' %}
+                            {% for user, tasks_counts in tasks_per_user.items %}
+                            <tr>
+                                <td>{{ user.first_name }}&nbsp;{{ user.last_name }}</td>
+                                <td>{{ tasks_counts.deferred_count }}</td>
+                                <td>{{ tasks_counts.in_progress_count }}</td>
+                                <td>{{ tasks_counts.needs_rework_count }}</td>
+                                <td>{{ tasks_counts.overdue_task }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% elif current_user.user_type == '2' %}
+                            {% for user, tasks_counts in tasks_per_user.items %}
+                            {% if user == current_user %}
+                            <tr>
+                                <td>{{ user.first_name }}&nbsp;{{ user.last_name }}</td>
+                                <td>{{ tasks_counts.deferred_count }}</td>
+                                <td>{{ tasks_counts.in_progress_count }}</td>
+                                <td>{{ tasks_counts.needs_rework_count }}</td>
+                                <td>{{ tasks_counts.overdue_task }}</td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tasksTable" class="row">
+        <div class="col-sm-12">
+            <div class="card card-table">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        {% include 'includes/messages.html' %}
+                        <table id="table_id" class="table table-hover table-center mb-0">
+                            <thead>
+                            <tr>
+                                <th>Название задачи</th>
+                                <th>Ответственный</th>
+                                <th>Отдел</th>
+                                <th>Статус задачи</th>
+                                <th>Дедлайн</th>
+                                <th>Проект</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% if current_user.user_type == '2' %}
+                            {% for i in task %}
+                            {% if i.bitrix_staff_id == current_user %}
+                            <tr>
+                                <td>{{ i.TITLE }}</td>
+                                <td>{{ i.bitrix_staff_id.first_name }}&nbsp;{{ i.bitrix_staff_id.last_name }}</td>
+                                <td>{{ i.bitrix_staff_id.WORK_DEPARTMENT }}</td>
+                                {% if i.STATUS == '3' %}
+                                <td>Задача в процессе</td>
+                                {% elif i.STATUS == '6' %}
+                                <td>Задача отложена</td>
+                                {% elif i.STATUS == '5' %}
+                                <td>Задача завершена</td>
+                                {% elif i.STATUS == '7' %}
+                                <td>Задача отклонена</td>
+                                {% endif %}
+                                <td>{{ i.DEADLINE }}</td>
+                                <td>{{ i.GROUP_PROJECTS }}</td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                            {% elif current_user.user_type == '1' %}
+                            {% for i in task %}
+                            <tr>
+                                <td>{{ i.TITLE }}</td>
+                                <td>{{ i.bitrix_staff_id.first_name }}&nbsp;{{ i.bitrix_staff_id.last_name }}</td>
+                                <td>{{ i.bitrix_staff_id.WORK_DEPARTMENT }}</td>
+                                {% if i.STATUS == '3' %}
+                                <td>Задача в процессе</td>
+                                {% elif i.STATUS == '6' %}
+                                <td>Задача отложена</td>
+                                {% elif i.STATUS == '5' %}
+                                <td>Задача завершена</td>
+                                {% elif i.STATUS == '7' %}
+                                <td>Задача отклонена</td>
+                                {% endif %}
+                                <td>{{ i.DEADLINE }}</td>
+                                <td>{{ i.GROUP_PROJECTS }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('analyticsBtn').addEventListener('click', function() {
+    document.getElementById('analyticsTable').style.display = 'block';
+    document.getElementById('tasksTable').style.display = 'none';
+});
+
+document.getElementById('tasksBtn').addEventListener('click', function() {
+    document.getElementById('analyticsTable').style.display = 'none';
+    document.getElementById('tasksTable').style.display = 'block';
+});
+
+</script>
+
+{% include 'includes/chart.html' %}
+{% endblock %}

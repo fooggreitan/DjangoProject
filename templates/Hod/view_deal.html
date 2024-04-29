@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="content container-fluid">
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h3 class="page-title">Cделки</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'hod_home' %}">Панель управления</a></li>
+                    <li class="breadcrumb-item active">Cделки</li>
+                </ul>
+            </div>
+<!--            <div class="col-auto text-right float-right ml-auto">-->
+<!--                <a href="#" class="btn btn-outline-primary mr-2"><i class="fas fa-download"></i> Cделки</a>-->
+<!--                <a href="{% url 'add_staff' %}" class="btn btn-primary"><i class="fas fa-plus"></i></a>-->
+<!--            </div>-->
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card card-table">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        {% include 'includes/messages.html' %}
+                        <table id="table_id" class="table table-hover table-center mb-0 ">
+                            <thead>
+                            <tr>
+                                <th>Клиент</th>
+                                <th>Вид сделки</th>
+                                <th>Ответственный</th>
+                                <th>Статус</th>
+                                <th>Дата закрытия</th>
+                                <th>Дата создания</th>
+                                <th>Дата изменения</th>
+                                <th class="text-right">Action</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            {% if user.user_type == '1' %}
+                            {% for i in deal %}
+                            <tr>
+                                <td>{{i.title}}</td>
+                                <td>{{i.TYPE_ID}}</td>
+                                <td>{{i.bitrix_staff_id.first_name}}</td>
+                                <td>{{i.Status}}</td>
+                                <td>{{i.CLOSEDATE}}</td>
+                                <td>{{i.DATE_CREATE}}</td>
+                                <td>{{i.DATE_MODIFY}}</td>
+                                <td class="text-right">
+                                    <div class="actions">
+                                        <a href="" class="btn btn-sm bg-success-light mr-2">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        <a href="" class="btn btn-sm bg-danger-light">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                            {% elif user.user_type == '2' %}
+                            {% for i in deal %}
+                            {% if i.bitrix_staff_id == user %}
+                            <tr>
+                                <td>{{i.title}}</td>
+                                <td>{{i.TYPE_ID}}</td>
+                                <td>{{i.bitrix_staff_id.first_name}}</td>
+                                <td>{{i.Status}}</td>
+                                <td>{{i.CLOSEDATE}}</td>
+                                <td>{{i.DATE_CREATE}}</td>
+                                <td>{{i.DATE_MODIFY}}</td>
+                                <td class="text-right">
+                                    <div class="actions">
+                                        <a href="" class="btn btn-sm bg-success-light mr-2">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        <a href="" class="btn btn-sm bg-danger-light">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

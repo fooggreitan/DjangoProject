@@ -1,0 +1,82 @@
+<!-- The header element will appear on the top of each page of this estimate document. -->
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+<!--     <link rel="stylesheet" href="{% static 'assets/css/fonts.css' %}">-->
+    <style type="text/css">
+        .SimpiAI {
+            display: block;
+            margin-left: auto;
+            margin-right: auto
+        }
+        h2 {
+            text-align: center
+        }
+        h3 {
+            text-align: center
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="headerSection">
+        <div class="logoAndName">
+            <img class = "SimpiAI" src="{% static 'assets/img/PhotoSimpiAI.png' %}" height='130px'>
+        </div>
+        <div>
+            <h2>{{pdf.name_report}}</h2>
+            <p>
+                <b>Дата:</b> {{pdf.created_at}}<br>
+
+                {% for i in username %}
+                <b>Сотрудник:</b> {{i.first_name}}&nbsp;{{i.last_name}}<br>
+                {% endfor %}
+
+                <b>Должность:</b>
+            </p>
+        </div>
+    </div>
+    <hr/>
+    <div class="headerSection">
+        <div class="issuedTo">
+            <h3>Описание</h3>
+
+            <h4>Успехи:</h4>
+            <p>{{dict.progress|linebreaks}}</p>
+            <h4>Ошибки:</h4>
+            <p>{{dict.error|linebreaks}}</p>
+            <h4>Рекомендации по улучшению работы:</h4>
+            <p>{{dict.recommendations|linebreaks}}</p>
+            <h4>Общий комментарий:</h4>
+            <p>{{dict.comment|linebreaks}}</p>
+            <h4>Возможные риски:</h4>
+            <p>{{dict.risks|linebreaks}}</p>
+        </div>
+        <div>
+            <p>
+                <b>Примечания</b><br/>
+            </p>
+        </div>
+    </div>
+</header>
+
+<footer>
+</footer>
+
+<main>
+</main>
+
+<aside>
+    <hr/>
+    <b>Правила и условия</b>
+    <p>
+        ...
+    </p>
+</aside>
+
+</body>
+</html>
