@@ -5,7 +5,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-<!--     <link rel="stylesheet" href="{% static 'assets/css/fonts.css' %}">-->
     <style type="text/css">
         .SimpiAI {
             display: block;
@@ -28,15 +27,16 @@
             <img class = "SimpiAI" src="{% static 'assets/img/PhotoSimpiAI.png' %}" height='130px'>
         </div>
         <div>
-            <h2>{{pdf.name_report}}</h2>
+            {% for i in pdf %}
+            <h2>{{i.name_report}}</h2>
+            <b>Дата:</b> {{i.created_at}}<br>
+            {% endfor %}
             <p>
-                <b>Дата:</b> {{pdf.created_at}}<br>
-
                 {% for i in username %}
                 <b>Сотрудник:</b> {{i.first_name}}&nbsp;{{i.last_name}}<br>
+                <b>Должность:</b> {{i.WORK_POSITION}}<br>
+                <b>Отдел:</b> {{i.WORK_DEPARTMENT}}<br>
                 {% endfor %}
-
-                <b>Должность:</b>
             </p>
         </div>
     </div>
@@ -58,7 +58,7 @@
         </div>
         <div>
             <p>
-                <b>Примечания</b><br/>
+                <b></b><br/>
             </p>
         </div>
     </div>
@@ -71,8 +71,7 @@
 </main>
 
 <aside>
-    <hr/>
-    <b>Правила и условия</b>
+    <b></b>
     <p>
         ...
     </p>

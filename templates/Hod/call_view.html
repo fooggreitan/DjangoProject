@@ -22,8 +22,8 @@
         <div class="row">
             <div class="col-12 col-sm-2">
                 <div class="form-group">
-                    <select name="select_type_report" class="form-control">
-                        <option>Ничего не выбрано</option>
+                    <select name="select_type_period" class="form-control">
+                        <option value="">Ничего не выбрано</option>
                         <option value="month">Месяц</option>
                         <option value="day">День</option>
                         <option value="week">Неделя</option>
@@ -88,36 +88,36 @@
                         <table id="table_new" class="table table-hover table-center mb-0">
                             <thead>
                             <tr>
-                                <th>Ответственный</th>
-                                <th>Звонки менее 30 секунд</th>
-                                <th>Звонки больше 5 минут</th>
-                                <th>Исходящие звонки</th>
-                                <th>Входящие звонки</th>
-                                <th>Пропущенные звонки</th>
+                                <th class="text-center">Ответственный</th>
+                                <th class="text-center">Звонки менее 30 секунд</th>
+                                <th class="text-center">Звонки больше 5 минут</th>
+                                <th class="text-center">Исходящие звонки</th>
+                                <th class="text-center">Входящие звонки</th>
+                                <th class="text-center">Пропущенные звонки</th>
                             </tr>
                             </thead>
                             <tbody>
                             {% if current_user.user_type == '1' %}
                             {% for user, call_counts in call_per_user.items %}
                             <tr>
-                                <td>{{ user.first_name }}&nbsp;{{ user.last_name }}</td>
-                                <td>{{call_counts.number_calls_less_30}}</td>
-                                <td>{{call_counts.number_calls_more_5}}</td>
-                                <td>{{call_counts.total_Incoming_calls}}</td>
-                                <td>{{call_counts.total_outgoing_calls}}</td>
-                                <td>{{call_counts.total_missed_calls}}</td>
+                                <td class="text-center">{{ user.first_name }}&nbsp;{{ user.last_name }}</td>
+                                <td class="text-center">{{call_counts.number_calls_less_30}}</td>
+                                <td class="text-center">{{call_counts.number_calls_more_5}}</td>
+                                <td class="text-center">{{call_counts.total_Incoming_calls}}</td>
+                                <td class="text-center">{{call_counts.total_outgoing_calls}}</td>
+                                <td class="text-center">{{call_counts.total_missed_calls}}</td>
                             </tr>
                             {% endfor %}
                             {% elif current_user.user_type == '2' %}
                             {% for user, call_counts in call_per_user.items %}
                             {% if user == current_user %}
                             <tr>
-                                <td>{{ user.first_name }}&nbsp;{{ user.last_name }}</td>
-                                <td>{{call_counts.number_calls_less_30}}</td>
-                                <td>{{call_counts.number_calls_more_5}}</td>
-                                <td>{{call_counts.total_Incoming_calls}}</td>
-                                <td>{{call_counts.total_outgoing_calls}}</td>
-                                <td>{{call_counts.total_missed_calls}}</td>
+                                <td class="text-center">{{ user.first_name }}&nbsp;{{ user.last_name }}</td>
+                                <td class="text-center">{{call_counts.number_calls_less_30}}</td>
+                                <td class="text-center">{{call_counts.number_calls_more_5}}</td>
+                                <td class="text-center">{{call_counts.total_Incoming_calls}}</td>
+                                <td class="text-center">{{call_counts.total_outgoing_calls}}</td>
+                                <td class="text-center">{{call_counts.total_missed_calls}}</td>
                             </tr>
                             {% endif %}
                             {% endfor %}
@@ -144,7 +144,7 @@
                                 <th>Тип звонка</th>
                                 <th>Статус</th>
                                 <th>Номер телефона</th>
-                                <th>DateCreate</th>
+                                <th>Дата создания</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -239,11 +239,7 @@ document.getElementById('callBtn').addEventListener('click', function() {
     document.getElementById('analyticsTable').style.display = 'none';
     document.getElementById('callTable').style.display = 'block';
 });
-
-
-
-
-
 </script>
+
 {% include 'includes/chart.html' %}
 {% endblock %}

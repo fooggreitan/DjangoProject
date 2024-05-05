@@ -11,12 +11,28 @@
                     <li class="breadcrumb-item active">Рабочее время</li>
                 </ul>
             </div>
-            <!--            <div class="col-auto text-right float-right ml-auto">-->
-            <!--                <a href="#" class="btn btn-outline-primary mr-2"><i class="fas fa-download"></i> Дела</a>-->
-            <!--                <a href="{% url 'add_staff' %}" class="btn btn-primary"><i class="fas fa-plus"></i></a>-->
-            <!--            </div>-->
         </div>
     </div>
+
+    <form action="{% url 'timeControl_view' %}" method="post">{% csrf_token %}
+        <div class="row">
+            <div class="col-12 col-sm-2">
+                <div class="form-group">
+                    <select name="select_type_period" class="form-control">
+                        <option value="">Ничего не выбрано</option>
+                        <option value="month">Месяц</option>
+                        <option value="day">День</option>
+                        <option value="week">Неделя</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-sm-2">
+                <div class="form-group">
+                    <input type="submit" class="btn btn-outline-secondary mr-2" value="Применить">
+                </div>
+            </div>
+        </div>
+    </form>
 
     <div class="row">
         <div class="col-sm-12">
@@ -31,10 +47,7 @@
                                 <th>Длительность работы</th>
                                 <th>Длительность перерыва</th>
                                 <th>Статус</th>
-
                                 <th>Дата</th>
-
-                                <th class="text-right">Действия</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -42,22 +55,10 @@
                             {% for i in time %}
                             <tr>
                                 <td>{{i.bitrix_staff_id.first_name}}&nbsp;{{i.bitrix_staff_id.last_name}}</td>
-                                <td>{{i.DURATION}} ({{i.DURATION.total_seconds}} секунды)</td>
-                                <td>{{i.TIME_LEAKS}} ({{i.TIME_LEAKS.total_seconds}} секунды)</td>
+                                <td>{{i.DURATION}} ({{i.DURATION.total_seconds}} сек)</td>
+                                <td>{{i.TIME_LEAKS}} ({{i.TIME_LEAKS.total_seconds}} сек)</td>
                                 <td>{{i.STATUS}}</td>
-
                                 <td>{{i.START_TIME|date:"Y-m-d"}}</td>
-
-                                <td class="text-right">
-                                    <div class="d-grid gap-2 d-md-block">
-                                        <a href="" class="btn btn-sm bg-primary-light">
-                                            <i class="fas fa-download"></i>
-                                        </a>
-                                        <a href="" class="btn btn-sm bg-primary-light mr-2">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
                             </tr>
                             {% endfor %}
                             {% elif user.user_type == '2' %}
@@ -65,20 +66,10 @@
                             {% if i.bitrix_staff_id == user %}
                             <tr>
                                 <td>{{ i.bitrix_staff_id.first_name }}&nbsp;{{ i.bitrix_staff_id.last_name }}</td>
-                                <td>{{ i.DURATION }} ({{ i.DURATION.total_seconds }} секунды)</td>
-                                <td>{{ i.TIME_LEAKS }} ({{ i.TIME_LEAKS.total_seconds }} секунды)</td>
+                                <td>{{ i.DURATION }} ({{ i.DURATION.total_seconds }} сек)</td>
+                                <td>{{ i.TIME_LEAKS }} ({{ i.TIME_LEAKS.total_seconds }} сек)</td>
                                 <td>{{ i.STATUS }}</td>
                                 <td>{{ i.START_TIME|date:"Y-m-d" }}</td>
-                                <td class="text-right">
-                                    <div class="d-grid gap-2 d-md-block">
-                                        <a href="" class="btn btn-sm bg-primary-light">
-                                            <i class="fas fa-download"></i>
-                                        </a>
-                                        <a href="" class="btn btn-sm bg-primary-light mr-2">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
                             </tr>
                             {% endif %}
                             {% endfor %}

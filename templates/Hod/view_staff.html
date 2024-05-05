@@ -11,13 +11,8 @@
                     <li class="breadcrumb-item active">Список сотрудников</li>
                 </ul>
             </div>
-<!--            <div class="col-auto text-right float-right ml-auto">-->
-<!--                <a href="#" class="btn btn-outline-primary mr-2"><i class="fas fa-download"></i> Отчёт сотрудников</a>-->
-<!--                <a href="{% url 'add_staff' %}" class="btn btn-primary"><i class="fas fa-plus"></i></a>-->
-<!--            </div>-->
         </div>
     </div>
-
     <div class="row">
         <div class="col-sm-12">
             <div class="card card-table">
@@ -27,49 +22,27 @@
                         <table id="table_id" class="table table-hover table-center mb-0 ">
                             <thead>
                             <tr>
-<!--                                <th>ID</th>-->
                                 <th>Имя</th>
                                 <th>Email</th>
                                 <th>Отдел</th>
                                 <th>Должность</th>
                                 <th>Имя пользователя</th>
                                 <th>Последний вход</th>
-                                <th class="text-right">Action</th>
                             </tr>
                             </thead>
-
                             <tbody>
-
                             {% for i in staff %}
                             <tr>
-<!--                                <td>{{i.id}}</td>-->
                                 <td>
                                     <h2 class="table-avatar">
-<!--                                        <a href="student-details.html" class="avatar avatar-sm mr-2">-->
-<!--                                            <img-->
-<!--                                                class="avatar-img rounded-circle"-->
-<!--                                                src="/{{i.admin.profile_pic}}" alt="User Image">-->
-<!--                                        </a>-->
-                                        <a href="{% url 'about_profile' %}">{{i.first_name}}&nbsp;{{i.last_name}}</a>
+                                        <a href="">{{i.first_name}}&nbsp;{{i.last_name}}</a>
                                     </h2>
                                 </td>
-
                                 <td>{{i.email}}</td>
                                 <td>{{i.WORK_DEPARTMENT}}</td>
                                 <td>{{i.WORK_POSITION}}</td>
                                 <td>{{i.username}}</td>
                                 <td>{{i.last_login}}</td>
-
-                                <td class="text-right">
-                                    <div class="d-grid gap-2 d-md-block">
-                                        <a href="{% url 'edit_staff' i.id %}" class="btn btn-sm bg-primary-light">
-                                            <i class="fas fa-pen"></i>
-                                        </a>
-                                        <a href="{% url 'delete_staff' i.id %}" class="btn btn-sm bg-primary-light mr-2">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
                             </tr>
                             {% endfor %}
                             </tbody>

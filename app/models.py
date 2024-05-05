@@ -6,7 +6,6 @@ class CustomUser(AbstractUser):
     USER = (
         (1, 'HOD'),
         (2, 'STAFF'),
-        (3, 'STUDENT'),
     )
     user_type = models.CharField(choices=USER, max_length=50, default=1)
     WORK_POSITION = models.TextField(null=True)
@@ -83,7 +82,6 @@ class Case(models.Model):
         on_delete=models.CASCADE,
         null=True
     )
-
     def __str__(self):
         return self.DESCRIPTION
 
@@ -91,11 +89,11 @@ class Staff_Notification(models.Model):
     staff_id = models.ForeignKey(Staff, on_delete=models.CASCADE)
     message = models.TextField()
     status = models.IntegerField(null=True, default=0)
-
     def __str__(self):
         return self.staff_id.admin.first_name
 
 class TaskControl(models.Model):
+    ID_TASK = models.CharField(null=True)
     TITLE = models.TextField(null=True)
     DESCRIPTION = models.TextField(null=True)
     PRIORITY = models.TextField(null=True)
@@ -105,6 +103,9 @@ class TaskControl(models.Model):
     TIME_ESTIMATE = models.TextField(null=True, default=0)
     CREATED_DATE = models.DateTimeField(null=True)
     GROUP_PROJECTS = models.CharField(null=True)
+
+    COMMENT = models.TextField(null=True)
+    TASKOFCALL = models.TextField(null=True)
 
     bitrix_staff_id = models.ForeignKey(
         CustomUser,
@@ -117,13 +118,18 @@ class TaskControl(models.Model):
         return self.TITLE
 
 class callControl(models.Model):
-    DURATION = models.DurationField(null=True)
-    CALL_TYPE = models.CharField(null=True)
-    CALL_FAILED_CODE = models.TextField(null=True)
-    PHONE_NUMBER = models.TextField(null=True)
-    DateCreate = models.DateTimeField(null=True)
-    VOTE = models.TextField(null=True)
-    COST = models.TextField(null=True)
+    ID_CALL = models.CharField(null=True) # telephony.externalcall.register +
+    PHONE_NUMBER = models.TextField(null=True) # telephony.externalcall.register +
+    DateCreate = models.DateTimeField(null=True) # telephony.externalcall.register +
+
+    DURATION = models.DurationField(null=True)  # telephony.externalcall.finish +
+    CALL_TYPE = models.CharField(null=True)  # telephony.externalcall.finish +
+    CALL_FAILED_CODE = models.TextField(null=True)  # telephony.externalcall.finish +
+
+    VOTE = models.TextField(null=True) # telephony.externalcall.finish +
+    COST = models.TextField(null=True) # telephony.externalcall.finish +
+
+    COMMENT = models.TextField(null=True) # +
 
     bitrix_staff_id = models.ForeignKey(
         CustomUser,
@@ -137,6 +143,7 @@ class callControl(models.Model):
         return self.bitrix_staff_id
 
 class TimeControl(models.Model):
+    ID_TIME = models.CharField(null=True)
     bitrix_staff_id = models.ForeignKey(
         CustomUser,
         unique=False,
@@ -147,10 +154,8 @@ class TimeControl(models.Model):
     DURATION = models.DurationField(null=True)
     TIME_LEAKS = models.DurationField(null=True)
     STATUS = models.TextField()
-
     START_TIME = models.DateTimeField(null=True)
     END_TIME = models.DateTimeField(null=True)
-
     def __str__(self):
         return self.bitrix_staff_id
 
@@ -174,24 +179,25 @@ class Attendance(models.Model):
         return self.staff_id.name
 
 class Attendance_Report(models.Model):
-    # staff_id = models.ForeignKey(Staff, on_delete=models.DO_NOTHING)
-    # task_id = models.ForeignKey(Task, on_delete=models.DO_NOTHING)
-
-    # new_id = models.ForeignKey (Staff, on_delete=models.DO_NOTHING, primary_key=True, unique=True)
-
     name_report = models.CharField(max_length=200)
     description = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
     progress = models.TextField(null=True)
+
     Errors = models.TextField(null=True)
     practices_improving_your = models.TextField(null=True)
     performance = models.TextField(null=True)
     general_comment = models.TextField(null=True)
     possible_risks = models.TextField(null=True)
 
-    staff = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
+    staff = models.ForeignKey(
+        CustomUser,
+        unique=False,
+        to_field='bitrix_staff_id',
+        on_delete=models.CASCADE,
+        null=True
+    )
 
     def __str__(self):
         return self.name_report
