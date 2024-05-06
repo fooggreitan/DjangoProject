@@ -68,9 +68,8 @@ def doRegistr(request):
         if confirm_password == password:
             user = CustomUser.objects.filter(email=email).first()
             if user and user.password == '':
-                if request.POST.get('select_type_report') == 'Сотрудник':
+                if request.POST.get('select_type_role') == 'Сотрудник':
                     user.user_type = 2
-                    # Staff(admin=user).save()
                 else:
                     user.user_type = 1
 
@@ -80,13 +79,13 @@ def doRegistr(request):
                 return redirect('login')
             else:
                 messages.error(request, 'Электронная почта и пароль неверны!')
+                return redirect('register')
         else:
             messages.error(request, 'Вы ввели неправильный пароль!')
+            return redirect('register')
     else:
         messages.error(request, 'Электронная почта и пароль неверны!')
-
-    return redirect('register')
-
+        return redirect('register')
 
 def doLogin(request):
     if request.method == "POST":
@@ -99,8 +98,6 @@ def doLogin(request):
                 return redirect('hod_home')
             elif user_type == '2':
                 return redirect('staff_home')
-            elif user_type == '3':
-                return HttpResponse('This Emploes Panel')
         else:
             messages.error(request, 'Электронная почта и пароль неверны!')
             return redirect('login')

@@ -11,10 +11,6 @@
                     <li class="breadcrumb-item active">Задачи</li>
                 </ul>
             </div>
-            <!--            <div class="col-auto text-right float-right ml-auto">-->
-            <!--                <a href="#" class="btn btn-outline-primary mr-2"><i class="fas fa-download"></i> Дела</a>-->
-            <!--                <a href="{% url 'add_staff' %}" class="btn btn-primary"><i class="fas fa-plus"></i></a>-->
-            <!--            </div>-->
         </div>
     </div>
 
@@ -22,7 +18,7 @@
         <div class="row">
             <div class="col-12 col-sm-2">
                 <div class="form-group">
-                    <select name="select_type_report" class="form-control">
+                    <select name="select_type_period" class="form-control">
                         <option>Ничего не выбрано</option>
                         <option value="month">Месяц</option>
                         <option value="day">День</option>
@@ -38,13 +34,22 @@
         </div>
     </form>
 
+<!--    <div class="row">-->
+<!--        <div class="col-12">-->
+<!--            <div class="card card-chart">-->
+<!--            <textarea name="textPostSelect" class="form-control"-->
+<!--                      rows="10">{{response}}</textarea>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
     <div class="row">
         <div class="col-md-12 col-lg-6">
             <div class="card card-chart">
                 <div class="card-header">
                     <div class="row align-items-center">
                         <div class="col-6">
-                            <h5 class="card-title">Аналитика задач</h5>
+                            <h5 class="card-title">Аналитика статуса задач</h5>
                         </div>
                     </div>
                 </div>
@@ -58,7 +63,7 @@
                 <div class="card-header">
                     <div class="row align-items-center">
                         <div class="col-6">
-                            <h5 class="card-title">Аналитика задач</h5>
+                            <h5 class="card-title">Аналитика сортировки задач</h5>
                         </div>
                     </div>
                 </div>
@@ -89,33 +94,33 @@
                         <table id="table_new" class="table table-hover table-center mb-0">
                             <thead>
                             <tr>
-                                <th>Ответственный</th>
-                                <th>Отложенные задачи</th>
-                                <th>Выполняемые задачи</th>
-                                <th>Задачи на переделке</th>
-                                <th>Просроченные задачи</th>
+                                <th class="text-center">Ответственный</th>
+                                <th class="text-center">Отложенные задачи</th>
+                                <th class="text-center">Выполняемые задачи</th>
+                                <th class="text-center">Задачи на переделке</th>
+                                <th class="text-center">Просроченные задачи</th>
                             </tr>
                             </thead>
                             <tbody>
                             {% if current_user.user_type == '1' %}
                             {% for user, tasks_counts in tasks_per_user.items %}
                             <tr>
-                                <td>{{ user.first_name }}&nbsp;{{ user.last_name }}</td>
-                                <td>{{ tasks_counts.deferred_count }}</td>
-                                <td>{{ tasks_counts.in_progress_count }}</td>
-                                <td>{{ tasks_counts.needs_rework_count }}</td>
-                                <td>{{ tasks_counts.overdue_task }}</td>
+                                <td class="text-center">{{ user.first_name }}&nbsp;{{ user.last_name }}</td>
+                                <td class="text-center">{{ tasks_counts.deferred_count }}</td>
+                                <td class="text-center">{{ tasks_counts.in_progress_count }}</td>
+                                <td class="text-center">{{ tasks_counts.needs_rework_count }}</td>
+                                <td class="text-center">{{ tasks_counts.overdue_task }}</td>
                             </tr>
                             {% endfor %}
                             {% elif current_user.user_type == '2' %}
                             {% for user, tasks_counts in tasks_per_user.items %}
                             {% if user == current_user %}
                             <tr>
-                                <td>{{ user.first_name }}&nbsp;{{ user.last_name }}</td>
-                                <td>{{ tasks_counts.deferred_count }}</td>
-                                <td>{{ tasks_counts.in_progress_count }}</td>
-                                <td>{{ tasks_counts.needs_rework_count }}</td>
-                                <td>{{ tasks_counts.overdue_task }}</td>
+                                <td class="text-center">{{ user.first_name }}&nbsp;{{ user.last_name }}</td>
+                                <td class="text-center">{{ tasks_counts.deferred_count }}</td>
+                                <td class="text-center">{{ tasks_counts.in_progress_count }}</td>
+                                <td class="text-center">{{ tasks_counts.needs_rework_count }}</td>
+                                <td class="text-center">{{ tasks_counts.overdue_task }}</td>
                             </tr>
                             {% endif %}
                             {% endfor %}
@@ -161,6 +166,8 @@
                                 <td>Задача завершена</td>
                                 {% elif i.STATUS == '7' %}
                                 <td>Задача отклонена</td>
+                                {% elif i.STATUS == '2' %}
+                                <td>Задача в ожидании</td>
                                 {% endif %}
                                 <td>{{ i.DEADLINE }}</td>
                                 <td>{{ i.GROUP_PROJECTS }}</td>
@@ -181,6 +188,8 @@
                                 <td>Задача завершена</td>
                                 {% elif i.STATUS == '7' %}
                                 <td>Задача отклонена</td>
+                                {% elif i.STATUS == '2' %}
+                                <td>Задача в ожидании</td>
                                 {% endif %}
                                 <td>{{ i.DEADLINE }}</td>
                                 <td>{{ i.GROUP_PROJECTS }}</td>
@@ -206,6 +215,7 @@ document.getElementById('tasksBtn').addEventListener('click', function() {
     document.getElementById('analyticsTable').style.display = 'none';
     document.getElementById('tasksTable').style.display = 'block';
 });
+
 
 </script>
 

@@ -779,3 +779,141 @@ docker-compose run web python manage.py createsuperuser
 docker-compose exec db psql -U postgres -d newproject
 insert into app_bitrix24(webhook, name_webhook) values ('', 'one');
 docker-compose restart web
+
+# ai
+from g4f.client import Client
+client = Client()
+response = client.chat.completions.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}]).choices[0].message.content
+
+df = pd.DataFrame(anlazing_call)
+
+# переделки
+````
+# genai.configure(api_key="AIzaSyDRK2DTmNY61tutvN2n_W51O0diOrr5ulU")
+#
+# generation_config = {
+#     "temperature": 0.9,
+#     "top_p": 1,
+#     "top_k": 1,
+#     "max_output_tokens": 2048,
+# }
+#
+# safety_settings = [
+#     {
+#         "category": "HARM_CATEGORY_HARASSMENT",
+#         "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+#     },
+#     {
+#         "category": "HARM_CATEGORY_HATE_SPEECH",
+#         "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+#     },
+#     {
+#         "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+#         "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+#     },
+#     {
+#         "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+#         "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+#     },
+# ]
+#
+# model = genai.GenerativeModel(
+#     model_name="gemini-1.0-pro",
+#     generation_config=generation_config,
+#     safety_settings=safety_settings
+# )
+
+'''ChatGTP'''
+# prompts = []
+
+# '''Начальный системный промт'''
+#
+# prompts.append({"role": "system", "content": """
+#     Ты являешься ботом который формирует отчёты от третьего лица (от лица компании Эркью)
+#     Ты должен следовать всем требованиям формирования отчётов для эффективности и контроля
+#     работы сотрудников организации. Вывод информации должен содержать заголовки [Успехи:], [Ошибки:], [Рекомендации по улучшению работы:], [Общий комментарий:].
+# """})
+#
+# '''Промт сотрудника за месяц'''
+#
+# if select_type_staff == "Сотрудник не выбран":
+#     prompts.append({"role": "user", "content": "Cделай {0} включая каждого сотрудников {1}".format(
+#         select_report_type,
+#         customer
+#     )})
+# else:
+#     prompts.append({"role": "user", "content": "Cделай {0} по сотруднику {1}".format(
+#         select_report_type,
+#         select_type_staff
+#     )})
+
+# response = openai.ChatCompletion.create(
+#     model="ft:gpt-3.5-turbo-0613:personal::7wZAALHG",
+#     messages=prompts,
+#     api_key="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",
+#     max_tokens=1200,
+#     temperature=0.2,
+#     top_p=1,
+#     frequency_penalty=0.5,
+#     presence_penalty=0.5
+# )
+
+# staff = CustomUser.objects.filter(
+#     id__in=Staff.objects.values_list('admin_id', flat=True)
+# ).values('first_name', 'last_name')
+# for i in staff:
+#     customer += "{0} {1} \n".format(i['first_name'], i['last_name'])
+
+# first_name, last_name = select_type_staff_split.split()
+# user_input = request.POST.get('textPostSelect')
+# print(user_input)
+
+# from g4f.client import Client
+# client = Client()
+print(request)
+# conversation = request.session.get('conversation', [])
+
+# response = client.chat.completions.create(model="gpt-3.5-turbo",
+#                                           messages=[
+#                                               {"role": "user", "content": prompt}]
+#                                           ).choices[0].message.content
+# print(response)
+
+# response = model.generate_content(prompt)
+
+# add_new_report_emps = Attendance_Report(
+#     name_report=select_report_type,
+#     description=response.text
+# )
+# response = client.chat.completions.create(model="gpt-3.5-turbo",
+#                                           messages=[
+#                                               {"role": "user", "content": prompt}]
+#                                           ).choices[0].message.content
+# print(response)
+# response = model.generate_content(prompt)
+
+# add_new_report_emp = Attendance_Report(
+#     name_report=select_report_type,
+#     description=response.text,
+#     staff_id=str(staff_add)
+# )
+
+# add_new_report.save()
+# prompt.clear()
+
+# add_new_report_PDF = Customer(
+#     name_report=select_report_type,
+# )
+# add_new_report_PDF.save()
+
+# Extract chatbot replies from the response
+# chatbot_replies = [message['message']['content'] for message in response['choices'] if
+#                    message['message']['role'] == 'assistant']
+
+# Append chatbot replies to the conversation
+# for reply in chatbot_replies:
+#     conversation.append({"role": "assistant", "content": reply})
+
+# Update the conversation in the session
+# request.session['conversation'] = conversation
+````

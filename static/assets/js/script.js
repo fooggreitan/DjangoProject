@@ -8,13 +8,13 @@ Version      : 1.0
 (function($) {
     "use strict";
 
-	// Variables declarations
+	// Объявления переменных
 
 	var $wrapper = $('.main-wrapper');
 	var $pageWrapper = $('.page-wrapper');
 	var $slimScrolls = $('.slimscroll');
 
-	// Sidebar
+	// Боковая панель
 
 	var Sidemenu = function() {
 		this.$menuItem = $('#sidebar-menu a');
@@ -39,10 +39,10 @@ Version      : 1.0
 		$('#sidebar-menu ul li.submenu a.active').parents('li:last').children('a:first').addClass('active').trigger('click');
 	}
 
-	// Sidebar Initiate
+	// Инициировать боковую панель
 	init();
 
-	// Mobile menu sidebar overlay
+	// Оверлей боковой панели мобильного меню
 
 	$('body').append('<div class="sidebar-overlay"></div>');
 	$(document).on('click', '#mobile_btn', function() {
@@ -52,7 +52,7 @@ Version      : 1.0
 		return false;
 	});
 
-	// Sidebar overlay
+	// Оверлей боковой панели
 
 	$(".sidebar-overlay").on("click", function () {
 		$wrapper.removeClass('slide-nav');
@@ -60,14 +60,14 @@ Version      : 1.0
 		$('html').removeClass('menu-opened');
 	});
 
-	// Page Content Height
+	// Высота содержимого страницы
 
 	if($('.page-wrapper').length > 0 ){
 		var height = $(window).height();
 		$(".page-wrapper").css("min-height", height);
 	}
 
-	// Page Content Height Resize
+	// Изменение высоты содержимого страницы
 
 	$(window).resize(function(){
 		if($('.page-wrapper').length > 0 ){
@@ -85,7 +85,7 @@ Version      : 1.0
         });
     }
 
-	// Datetimepicker
+	// Выбор даты и времени
 
 	if($('.datetimepicker').length > 0 ){
 		$('.datetimepicker').datetimepicker({
@@ -104,13 +104,13 @@ Version      : 1.0
 		});
 	}
 
-	// Tooltip
+	// Всплывающая подсказка
 
 	if($('[data-toggle="tooltip"]').length > 0 ){
 		$('[data-toggle="tooltip"]').tooltip();
 	}
 
-    // Datatable
+    // Таблица данных
 
     if ($('.datatable').length > 0) {
         $('.datatable').DataTable({
@@ -118,7 +118,7 @@ Version      : 1.0
         });
     }
 
-	// Check all email
+	// Проверить всю электронную почту
 
 	$(document).on('click', '#check_all', function() {
 		$('.checkmail').click();
@@ -136,7 +136,7 @@ Version      : 1.0
 		});
 	}
 
-	// Mail important
+	// Почта важная
 
 	$(document).on('click', '.mail-important', function() {
 		$(this).find('i.fa').toggleClass('fa-star').toggleClass('fa-star-o');
@@ -154,7 +154,7 @@ Version      : 1.0
 	}
 
 
-	// Sidebar Slimscroll
+	// Боковая панель Slimscroll
 
 	if($slimScrolls.length > 0) {
 		$slimScrolls.slimScroll({
@@ -177,7 +177,7 @@ Version      : 1.0
 		});
 	}
 
-	// Small Sidebar
+	// Маленькая боковая панель
 
 	$(document).on('click', '#toggle_btn', function() {
 		if($('body').hasClass('mini-sidebar')) {
@@ -208,7 +208,7 @@ Version      : 1.0
 		}
 	});
 
-	// Circle Progress Bar
+	// Круговой индикатор прогресса
 	function animateElements() {
 		$('.circle-bar1').each(function () {
 			var elementPos = $(this).offset().top;
@@ -268,7 +268,7 @@ Version      : 1.0
 	}
 	$(window).scroll(animateElements);
 
-	// Preloader
+	// Предварительный загрузчик
 
 	$(window).on('load', function () {
 		if($('#loader').length > 0) {

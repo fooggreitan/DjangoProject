@@ -21,7 +21,6 @@ urlpatterns = [
     # path('Hod/Report', AppListView.as_view(), name='list-view'),
 
     path('pdf/<str:id>', app_render_pdf_view, name='pdf-view'),
-    path('Hod/Report/DeletePDF/<str:id>', Hod_Views.DELETEPDF, name='pdf-delete'),
 
     # login
     path('', views.LOGIN, name='login'),
@@ -39,9 +38,11 @@ urlpatterns = [
     path('Profile', views.PROFILE, name='profile'),
 
     path('Hod/Report#', Hod_Views.chatbot_view, name='chatbot_view'),
-
     path('Hod/Reports#', Hod_Views.create_new_report, name='create_new_report'),
     path('Hod/ReportCreate', Hod_Views.REPORTCREATE, name='report_create'),
+
+    path('Hod/Report', Hod_Views.ADD_REPORT, name='add_report'),
+    path('Hod/Report/DeleteReport/<str:id>', Hod_Views.DELETEREPORT, name='report-delete'),
 
     path('Hod/TaskControl', Hod_Views.TASKCONTROL, name='taskControl_view'),
     path('Hod/TimeControl', Hod_Views.TIMECONTROL, name='timeControl_view'),
@@ -51,9 +52,7 @@ urlpatterns = [
     path('Profile/update', views.PROFILE_UPDATE, name='profile_update'),
     path('Hod/Staff/about_profile', Hod_Views.ABOUT_PROFILE, name='about_profile'),
 
-    # Hod panel
     path('Hod/Home', Hod_Views.HOME, name='hod_home'),
-    path('Hod/Report', Hod_Views.ADD_REPORT, name='add_report'),
     path('Hod/Deal', Hod_Views.VIEW_DEAL, name='view_deal'),
     path('Hod/Case', Hod_Views.VIEW_CASE, name='view_case'),
 
@@ -63,7 +62,9 @@ urlpatterns = [
     # path('Hod/Report', Hod_Views.chatbot, name='chatGPT_add_report'),
 
     path('Hod/Staff/Add', Hod_Views.ADD_STAFF, name='add_staff'),
+
     path('Hod/Staff/View', Hod_Views.VIEW_STAFF, name='view_staff'),
+
     path('Hod/Staff/Edit/<str:id>', Hod_Views.EDIT_STAFF, name='edit_staff'),
     path('Hod/Staff/Delete/<str:admin>', Hod_Views.DELETE_STAFF, name='delete_staff'),
 

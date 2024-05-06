@@ -1,40 +1,222 @@
 <script>
     $(document).ready(function() {
 
-	// Area chart
-
-	if ($('#stud_gender').length > 0) {
-	var options = {
-		chart: {
-			height: 350,
-			type: "area",
-			toolbar: {
-				show: false
-			},
-		},
-		dataLabels: {
-			enabled: false
-		},
-		stroke: {
-			curve: "smooth"
-		},
-		series: [{
-			name: "Teachers",
-			data: [45, 60, 75, 51, 42, 42, 30]
-		}, {
-			name: "Students",
-			color: '#FFBC13',
-			data: [24, 48, 56, 32, 34, 52, 25]
-		}],
-		xaxis: {
-			categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-		}
+    if ($('#bar_char_task').length > 0) {
+	    var optionsChar = {
+            chart: {
+                height: 350,
+                type: "area",
+                toolbar: {
+                    show: false
+                },
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: "smooth"
+            },
+            series: [{
+                name: "Задачи в доработке",
+                color: '#18AEFA',
+                data: [
+                    {{ monthly_task.january.needs_rework_count }},
+                    {{ monthly_task.february.needs_rework_count }},
+                    {{ monthly_task.march.needs_rework_count }},
+                    {{ monthly_task.april.needs_rework_count }},
+                    {{ monthly_task.may.needs_rework_count }},
+                    {{ monthly_task.june.needs_rework_count }},
+                    {{ monthly_task.july.needs_rework_count }},
+                    {{ monthly_task.august.needs_rework_count }},
+                    {{ monthly_task.september.needs_rework_count }},
+                    {{ monthly_task.october.needs_rework_count }},
+                    {{ monthly_task.november.needs_rework_count }},
+                    {{ monthly_task.december.needs_rework_count }},
+                ]
+            }],
+            xaxis: {
+                categories: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
+            }
+       }
+       var chart = new ApexCharts(document.querySelector("#bar_char_task"),optionsChar);
+       chart.render();
 	}
-	var chart = new ApexCharts(
-		document.querySelector("#apexcharts-area"),
-		options
-	);
-	chart.render();
+
+	if ($('#bar_char_call').length > 0) {
+	    var optionsChar = {
+            chart: {
+                height: 350,
+                type: "area",
+                toolbar: {
+                    show: false
+                },
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: "smooth"
+            },
+            series: [{
+                name: "Звонки меньше 30 секунд",
+                color: '#FFB64D',
+                data: [
+                    {{monthly_calls.january.total_calls_less_30}},
+                    {{monthly_calls.february.total_calls_less_30}},
+                    {{monthly_calls.march.total_calls_less_30}},
+                    {{ monthly_calls.april.total_calls_less_30 }},
+                    {{ monthly_calls.may.total_calls_less_30 }},
+                    {{ monthly_calls.june.total_calls_less_30 }},
+                    {{ monthly_calls.july.total_calls_less_30 }},
+                    {{ monthly_calls.august.total_calls_less_30 }},
+                    {{ monthly_calls.september.total_calls_less_30 }},
+                    {{ monthly_calls.october.total_calls_less_30 }},
+                    {{ monthly_calls.november.total_calls_less_30 }},
+                    {{ monthly_calls.december.total_calls_less_30 }},
+                ]
+            }, {
+                name: "Звонки больше 5 минут",
+                color: '#FA5D5D',
+                data: [
+                    {{monthly_calls.january.total_calls_more_5}},
+                    {{monthly_calls.february.total_calls_more_5}},
+                    {{monthly_calls.march.total_calls_more_5}},
+                    {{ monthly_calls.april.total_calls_more_5 }},
+                    {{ monthly_calls.may.total_calls_more_5 }},
+                    {{ monthly_calls.june.total_calls_more_5 }},
+                    {{ monthly_calls.july.total_calls_more_5 }},
+                    {{ monthly_calls.august.total_calls_more_5 }},
+                    {{ monthly_calls.september.total_calls_more_5 }},
+                    {{ monthly_calls.october.total_calls_more_5 }},
+                    {{ monthly_calls.november.total_calls_less_30 }},
+                    {{ monthly_calls.december.total_calls_more_5 }},
+                ]
+            }, {
+                name: "Звонки в норме",
+                color: '#86CE00',
+                data: [
+                    {{monthly_calls.january.total_calls_normal}},
+                    {{monthly_calls.february.total_calls_normal}},
+                    {{monthly_calls.march.total_calls_normal}},
+                    {{ monthly_calls.april.total_calls_normal }},
+                    {{ monthly_calls.may.total_calls_normal }},
+                    {{ monthly_calls.june.total_calls_normal }},
+                    {{ monthly_calls.july.total_calls_normal }},
+                    {{ monthly_calls.august.total_calls_normal }},
+                    {{ monthly_calls.september.total_calls_normal }},
+                    {{ monthly_calls.october.total_calls_normal }},
+                    {{ monthly_calls.november.total_calls_normal }},
+                    {{ monthly_calls.december.total_calls_normal }},
+                ],
+            }],
+            xaxis: {
+                categories: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
+            }
+       }
+       var chart = new ApexCharts(document.querySelector("#bar_char_call"),optionsChar);
+       chart.render();
+	}
+
+	if ($('#e_char_call').length > 0) {
+	    var optionsChar = {
+            chart: {
+                height: 350,
+                type: "area",
+                toolbar: {
+                    show: false
+                },
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: "smooth"
+            },
+            series: [{
+                name: "Успешные звонки",
+                color: '#B17FC9',
+                data: [
+                    {{monthly_calls_e.january.successful_calls}},
+                    {{monthly_calls_e.february.successful_calls}},
+                    {{monthly_calls_e.march.successful_calls}},
+                    {{ monthly_calls_e.april.successful_calls }},
+                    {{ monthly_calls_e.may.successful_calls }},
+                    {{ monthly_calls_e.june.successful_calls }},
+                    {{ monthly_calls_e.july.successful_calls }},
+                    {{ monthly_calls_e.august.successful_calls }},
+                    {{ monthly_calls_e.september.successful_calls }},
+                    {{ monthly_calls_e.october.successful_calls }},
+                    {{ monthly_calls_e.november.successful_calls }},
+                    {{ monthly_calls_e.december.successful_calls }},
+                ]
+            }],
+            xaxis: {
+                categories: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
+            }
+       }
+       var chart = new ApexCharts(document.querySelector("#e_char_call"),optionsChar);
+       chart.render();
+	}
+
+	if ($('#e_task_call').length > 0) {
+	    var optionsChar = {
+            chart: {
+                height: 350,
+                type: "area",
+                toolbar: {
+                    show: false
+                },
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: "smooth"
+            },
+            series: [{
+                name: "Просроченные задачи",
+                color: '#FA5D5D',
+                data: [
+                    {{monthly_task_e.january.overdue_task}},
+                    {{monthly_task_e.february.overdue_task}},
+                    {{monthly_task_e.march.overdue_task}},
+                    {{ monthly_task_e.april.overdue_task }},
+                    {{ monthly_task_e.may.overdue_task }},
+                    {{ monthly_task_e.june.overdue_task }},
+                    {{ monthly_task_e.july.overdue_task }},
+                    {{ monthly_task_e.august.overdue_task }},
+                    {{ monthly_task_e.september.overdue_task }},
+                    {{ monthly_task_e.october.overdue_task }},
+                    {{ monthly_task_e.november.overdue_task }},
+                    {{ monthly_task_e.december.overdue_task }},
+                ]
+            }, {
+                name: "Успешно завершенные задачи",
+                color: '#88B04B',
+                data: [
+                    {{monthly_task_e.january.completed_count}},
+                    {{monthly_task_e.february.completed_count}},
+                    {{monthly_task_e.march.completed_count}},
+                    {{ monthly_task_e.april.completed_count }},
+                    {{ monthly_task_e.may.completed_count }},
+                    {{ monthly_task_e.june.completed_count }},
+                    {{ monthly_task_e.july.completed_count }},
+                    {{ monthly_task_e.august.completed_count }},
+                    {{ monthly_task_e.september.completed_count }},
+                    {{ monthly_task_e.october.completed_count }},
+                    {{ monthly_task_e.november.completed_count }},
+                    {{ monthly_task_e.december.completed_count }},
+                ]
+            }],
+            xaxis: {
+                labels: {
+                    rotate: -1
+                },
+                categories: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
+            }
+       }
+       var chart = new ApexCharts(document.querySelector("#e_task_call"),optionsChar);
+       chart.render();
 	}
 
 	// Bar chart
@@ -136,24 +318,25 @@
 
 	if ($('#char').length > 0) {
 	var optionsPie = {
-		chart: {
-			width: '100%',
-			height: 397,
-			type: 'pie',
-		},
-		labels: ['В процессе', 'На доработоку', 'Отложенные', 'Завершенные', 'Новые','В ожидании'],
-		series: [{{in_progress_count}}, {{needs_rework_count}}, {{deferred_count}}, {{completed_count}}, {{newTask}}, {{waitingTask}}],
-		plotOptions: {
-			pie: {
-				donut: {
-					size: '65%'
-				}
-			}
-		},
-		legend: {
-			position: 'bottom'
-		},
-	};
+    chart: {
+        width: '100%',
+        height: 397,
+        type: 'pie',
+    },
+    labels: ['В процессе', 'На доработку', 'Отложенные', 'Завершенные', 'Новые', 'В ожидании'],
+    series: [{{ in_progress_count }}, {{ needs_rework_count }}, {{ deferred_count }}, {{ completed_count }}, {{ newTask }}, {{ waitingTask }}],
+    plotOptions: {
+        pie: {
+            donut: {
+                size: '65%'
+            }
+        }
+    },
+    legend: {
+        position: 'bottom'
+    },
+        colors: ['#18AEFA', '#FFB64D', '#FA5D5D', '#86CE00', '#B17FC9', '#46C9E5'] // Замените цвета здесь
+    };
 	var chartPie = new ApexCharts(document.querySelector('#char'), optionsPie);
 	chartPie.render();
     }
@@ -177,6 +360,7 @@
 		legend: {
 			position: 'bottom'
 		},
+        colors: ['#18AEFA', '#FFB64D', '#FA5D5D', '#86CE00']
 	};
 	var chartPie = new ApexCharts(document.querySelector('#char_task_ana'), optionsPie);
 	chartPie.render();
@@ -208,7 +392,33 @@
 	chartPie.render();
     }
 
-    // Bar chart
+    if ($('#char_type').length > 0) {
+	    var options = {
+          series: [{
+          data: [{{total_missed_calls}}, {{busy_calls}}, {{rejected_calls}}]
+        }],
+          chart: {
+          type: 'bar',
+          height: 230
+        },
+        plotOptions: {
+          bar: {
+            borderRadius: 4,
+            borderRadiusApplication: 'end',
+            horizontal: true,
+          }
+        },
+        dataLabels: {
+          enabled: false
+        },
+        xaxis: {
+          categories: ['Пропущенные', 'Занятые', 'Отклоненные']
+        }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#char_type"), options);
+        chart.render();
+	}
 
 	if ($('#char_din_call').length > 0) {
 	var optionsBar = {
@@ -232,12 +442,12 @@
 		series: [
 		{
 			name: "Исходящие",
-			color: '#FF5733',
+			color: '#D1EFFE',
 			data: [{{total_Incoming_calls}}],
 		},
 		{
 			name: "Входящие",
-			color: '#3366FF',
+			color: '#18AEFA',
 			data: [{{total_outgoing_calls}}],
 		}
 		],
@@ -277,78 +487,78 @@
 	var chartBar = new ApexCharts(document.querySelector('#char_din_call'), optionsBar);
 	chartBar.render();
 	}
-	if ($('#char_type').length > 0) {
-	var optionsBar = {
-		chart: {
-			type: 'bar',
-			height: 350,
-			width: '100%',
-			stacked: true,
-			toolbar: {
-				show: false
-			},
-		},
-		dataLabels: {
-			enabled: false
-		},
-		plotOptions: {
-			bar: {
-				columnWidth: '45%',
-			}
-		},
-		series: [
-		{
-            name: "Пропущенные",
-            color: '#FF5733',
-            data: [{{total_missed_calls}}],
-        },
-        {
-            name: "Отклоненные",
-            color: '#3366FF',
-            data: [{{rejected_calls}}],
-        },
-        {
-            name: "Занятые",
-            color: '#33FF33',
-            data: [{{busy_calls}}],
-        }
-		],
-		labels: ['Звонки'],
-		xaxis: {
-			labels: {
-				show: false
-			},
-			axisBorder: {
-				show: false
-			},
-			axisTicks: {
-				show: false
-			},
-		},
-		yaxis: {
-			axisBorder: {
-				show: false
-			},
-			axisTicks: {
-				show: false
-			},
-			labels: {
-				style: {
-					colors: '#777'
-				}
-			}
-		},
-		title: {
-			text: '',
-			align: 'left',
-			style: {
-				fontSize: '18px'
-			}
-		}
-	}
-	var chartBar = new ApexCharts(document.querySelector('#char_type'), optionsBar);
-	chartBar.render();
-	}
+<!--	if ($('#char_type').length > 0) {-->
+<!--	var optionsBar = {-->
+<!--		chart: {-->
+<!--			type: 'bar',-->
+<!--			height: 350,-->
+<!--			width: '100%',-->
+<!--			stacked: true,-->
+<!--			toolbar: {-->
+<!--				show: false-->
+<!--			},-->
+<!--		},-->
+<!--		dataLabels: {-->
+<!--			enabled: false-->
+<!--		},-->
+<!--		plotOptions: {-->
+<!--			bar: {-->
+<!--				columnWidth: '45%',-->
+<!--			}-->
+<!--		},-->
+<!--		series: [-->
+<!--		{-->
+<!--            name: "Пропущенные",-->
+<!--            color: '#FF5733',-->
+<!--            data: [{{total_missed_calls}}],-->
+<!--        },-->
+<!--        {-->
+<!--            name: "Отклоненные",-->
+<!--            color: '#3366FF',-->
+<!--            data: [{{rejected_calls}}],-->
+<!--        },-->
+<!--        {-->
+<!--            name: "Занятые",-->
+<!--            color: '#33FF33',-->
+<!--            data: [{{busy_calls}}],-->
+<!--        }-->
+<!--		],-->
+<!--		labels: ['Звонки'],-->
+<!--		xaxis: {-->
+<!--			labels: {-->
+<!--				show: false-->
+<!--			},-->
+<!--			axisBorder: {-->
+<!--				show: false-->
+<!--			},-->
+<!--			axisTicks: {-->
+<!--				show: false-->
+<!--			},-->
+<!--		},-->
+<!--		yaxis: {-->
+<!--			axisBorder: {-->
+<!--				show: false-->
+<!--			},-->
+<!--			axisTicks: {-->
+<!--				show: false-->
+<!--			},-->
+<!--			labels: {-->
+<!--				style: {-->
+<!--					colors: '#777'-->
+<!--				}-->
+<!--			}-->
+<!--		},-->
+<!--		title: {-->
+<!--			text: '',-->
+<!--			align: 'left',-->
+<!--			style: {-->
+<!--				fontSize: '18px'-->
+<!--			}-->
+<!--		}-->
+<!--	}-->
+<!--	var chartBar = new ApexCharts(document.querySelector('#char_type'), optionsBar);-->
+<!--	chartBar.render();-->
+<!--	}-->
 <!--	if ($('#char_type').length > 0) {-->
 <!--	var optionsChar = {-->
 <!--		chart: {-->

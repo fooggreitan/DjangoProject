@@ -26,55 +26,32 @@
                         <table id="table_id" class="table table-hover table-center mb-0 ">
                             <thead>
                             <tr>
-                                <!--                            <th>ID</th>-->
-                                <th>Название</th>
+                                <th>Наименование</th>
                                 <th>Ответственный</th>
                                 <th>Участник</th>
-
                                 <th>Дата создания</th>
                                 <th>Дата изменения</th>
                                 <th class="text-right">Действия</th>
                             </tr>
                             </thead>
-
                             <tbody>
-
                             {% for i in content %}
                             <tr>
-                                <!--                            <td>{{i.id}}</td>-->
-                                <!--                            <td>-->
-                                <!--                                <h2 class="table-avatar">-->
-                                <!--                                    <a href="student-details.html" class="avatar avatar-sm mr-2">-->
-                                <!--                                        <img-->
-                                <!--                                                class="avatar-img rounded-circle"-->
-                                <!--                                                src="" alt="User Image">-->
-                                <!--                                    </a>-->
-                                <!--                                    <a href=""></a>-->
-                                <!--                                </h2>-->
-                                <!--                            </td>-->
-
                                 <td>{{i.name_report}}</td>
                                 <th>{{user.first_name}}&nbsp;{{user.last_name}}</th>
-
                                 {% if i.staff_id == None %}
                                 <th>Все сотрудники</th>
                                 {% else %}
-                                <th>{{i.staff_id}}</th>
+                                <th>{{i.staff.first_name}}&nbsp;{{i.staff.last_name}}</th>
                                 {% endif %}
-
                                 <td>{{i.created_at}}</td>
                                 <td>{{i.updated_at}}</td>
-
                                 <td class="text-right">
                                     <div class="d-grid gap-2 d-md-block">
-                                        <!--                                    <a href="" class="btn btn-sm bg-primary-light mr-2">-->
-                                        <!--                                        <i class="fas fa-pen"></i>-->
-                                        <!--                                    </a>-->
-
                                         <a href="{% url 'pdf-view' i.id %}" class="btn btn-sm bg-primary-light">
                                             <i class="fas fa-download"></i>
                                         </a>
-                                        <a href="{% url 'pdf-delete' i.id %}" class="btn btn-sm bg-primary-light mr-2">
+                                        <a href="{% url 'report-delete' i.id %}" class="btn btn-sm bg-primary-light mr-2">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -101,6 +78,5 @@
 
         </div>
     </div>
-
-
-    {% endblock %}
+</div>
+{% endblock %}

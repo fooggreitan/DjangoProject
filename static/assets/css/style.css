@@ -2215,6 +2215,13 @@ footer p {
 .activity-feed .feed-item p span {
     color: #ffba38;
 }
+
+#myTextarea {
+    border: none;
+    color: #3bbafd;
+    margin: 0;
+}
+
 .sm-box {
     padding: 20px;
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
@@ -2224,8 +2231,7 @@ footer p {
     font-size: 80px;
     position: absolute;
     right: 15px;
-    bottom: 0px;
-}
+ффффыв
 .sm-box h6 {
     color: #fff;
     font-size: 25px;

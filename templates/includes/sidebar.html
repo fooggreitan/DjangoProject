@@ -86,7 +86,7 @@
                     <a href="#"><i class="fa fa-users"></i> <span> Сотрудники</span> <span
                             class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{% url 'view_staff' %}">Сотрудники View</a></li>
+                        <li><a href="{% url 'view_staff' %}">Cписок сотрудников</a></li>
                     </ul>
                 </li>
 
@@ -124,33 +124,29 @@
                 </li>
 
                 <li class="submenu {% active_link 'view_case||view_deal' 'active' %}">
-                    <a href="#"><i class="fa fa-binoculars"></i> <span> Эффективность </span> <span
+                    <a href="#"><i class="fa fa-binoculars"></i> <span> Аналитика </span> <span
+                            class="menu-arrow"></span></a>
+                    <ul>
+                        {% if user.WORK_DEPARTMENT == 'Отдел поддержки клиентов'  or  user.user_type == '1'%}
+                        <li>
+                            <a href="{% url 'callControl_view' %}"><i class=""></i> <span>Звонки</span></a>
+                        </li>
+                        {% endif %}
+                        <li>
+                            <a href="{% url 'taskControl_view' %}"><i class=""></i> <span>Задачи</span></a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="submenu {% active_link 'timeControl_view' 'active' %}">
+                    <a href="#"><i class="fa fa-address-book" aria-hidden="true"></i> <span> Трудовая дисциплина </span> <span
                             class="menu-arrow"></span></a>
                     <ul>
                         <li>
                             <a href="{% url 'timeControl_view' %}"><i class=""></i> <span>Рабочее время</span></a>
                         </li>
-
-                        <li>
-                            <a href="{% url 'callControl_view' %}"><i class=""></i> <span>Звонки</span></a>
-                        </li>
-
-                        <li>
-                            <a href="{% url 'taskControl_view' %}"><i class=""></i> <span>Задачи</span></a>
-                        </li>
-                        <li>
-                            <a href="{% url 'view_case' %}"><i class=""></i> <span>Дела</span></a>
-                        </li>
-                        <li>
-                            <a href="{% url 'view_deal' %}"><i class=""></i> <span>Cделки</span></a>
-                        </li>
                     </ul>
                 </li>
-
-                <li class="{% active_link '' 'active' %}">
-                    <a href="{% url 'staff_notification' %}"><i class="fas fa-bell"></i> <span>Уведомления</span></a>
-                </li>
-
 
                 <!--                <li class="submenu">-->
                 <!--                    <a href="#"><i class="fas fa-user-graduate"></i> <span> Панель управления</span> <span-->
