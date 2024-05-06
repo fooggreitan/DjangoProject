@@ -24,5 +24,12 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 ADD  . /app
 
+RUN apt update
+RUN apt -y install wget
+RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb
+RUN apt-get -y install wkhtmltopdf
+
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+RUN pip install -U g4f
+RUN pip install -U g4f[webdriver]
