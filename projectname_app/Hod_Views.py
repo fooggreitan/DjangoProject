@@ -1,3 +1,5 @@
+from random import randint
+
 from django.conf import settings
 from django.db.models import Count, Q
 from django.shortcuts import render, redirect
@@ -20,6 +22,9 @@ import os
 
 @login_required(login_url='/')
 def HOME(request):
+
+    g4f_request = ''
+
     staff_count = CustomUser.objects.filter(user_type='2').count()
     call_count = callControl.objects.all().count()
     task_count = TaskControl.objects.all().count()
@@ -35,7 +40,8 @@ def HOME(request):
 
     calls = callControl.objects.filter(DateCreate__year=datetime.now().year)
     task = TaskControl.objects.filter(CREATED_DATE__year=datetime.now().year)
-    months_of_interest = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
+    months_of_interest = ["january", "february", "march", "april", "may", "june", "july", "august", "september",
+                          "october", "november", "december"]
 
     for month_name in months_of_interest:
         month_number = datetime.strptime(month_name, "%B").month
@@ -70,13 +76,30 @@ def HOME(request):
     from datetime import timedelta
 
     analyzing_event = {' '.join((user.first_name, user.last_name)): {
-        "call": callControl.objects.exclude(DURATION__isnull=True).filter(bitrix_staff_id=user, DateCreate__month=datetime.now().month, DateCreate__week=datetime.now().isocalendar().week).values() or [],
-        "task": TaskControl.objects.exclude(id__isnull=True).filter(bitrix_staff_id=user, CREATED_DATE__month=datetime.now().month, CREATED_DATE__week=datetime.now().isocalendar().week).values() or [],
-        "time": TimeControl.objects.exclude(id__isnull=True).filter(bitrix_staff_id=user, START_TIME__month=datetime.now().month, START_TIME__week=datetime.now().isocalendar().week).values() or [],
-        "emp": CustomUser.objects.exclude(id__isnull=True).filter(bitrix_staff_id=user, date_joined__month=datetime.now().month, date_joined__week=datetime.now().isocalendar().week).values() or []
+        "call": callControl.objects.exclude(DURATION__isnull=True).filter(bitrix_staff_id=user,
+                                                                          DateCreate__month=datetime.now().month,
+                                                                          DateCreate__week=datetime.now().isocalendar().week).values(
+            'PHONE_NUMBER', 'DateCreate', 'DURATION', 'CALL_FAILED_CODE'
+        ) or [],
+        "task": TaskControl.objects.exclude(id__isnull=True).filter(bitrix_staff_id=user,
+                                                                    CREATED_DATE__month=datetime.now().month,
+                                                                    CREATED_DATE__week=datetime.now().isocalendar().week).values(
+            'TITLE', 'DESCRIPTION', 'DEADLINE'
+        ) or [],
+        "time": TimeControl.objects.exclude(id__isnull=True).filter(bitrix_staff_id=user,
+                                                                    START_TIME__month=datetime.now().month,
+                                                                    START_TIME__week=datetime.now().isocalendar().week).values(
+            'DURATION', 'TIME_LEAKS', 'STATUS', 'START_TIME', 'END_TIME'
+        ) or [],
+        "emp": CustomUser.objects.exclude(id__isnull=True).filter(bitrix_staff_id=user,
+                                                                  date_joined__month=datetime.now().month,
+                                                                  date_joined__week=datetime.now().isocalendar().week).values() or []
     } for user in users}
 
     analyzing_event = {user: data for user, data in analyzing_event.items() if any(data.values())}
+
+    print(analyzing_event)
+
 
     analyzing = {' '.join((user.first_name, user.last_name)): {
         "call": callControl.objects.filter(DURATION__lt='300', DURATION__gt='30', bitrix_staff_id=user,
@@ -90,296 +113,296 @@ def HOME(request):
 
     sorted_analyzing = sorted(analyzing.items(), key=lambda x: (x[1]['call'], x[1]['task'], x[1]['time']), reverse=True)[:3]
 
+    print(analyzing)
+
     # sorted_analyzing_event = sorted(analyzing_event.items(), key=lambda x: (x[1]['call'], x[1]['task'], x[1]['time'], x[1]['emp']),
     #                           reverse=True)[:5]
-
-    if Bitrix24.objects.get(name_webhook='one').webhook == '':
-        redirect('hod_home')
+    try:
+        if Bitrix24.objects.get(name_webhook='one').webhook == '':
+            redirect('hod_home')
+    except Exception:
+        Bitrix24.objects.create(
+            webhook = '',
+            name_webhook='one'
+        )
     else:
-        webhook = Bitrix(Bitrix24.objects.get(name_webhook='one').webhook)
-        # webhook = Bitrix("https://b24-3kb71v.bitrix24.ru/rest/1/pkh1p9s7i4ylt49r/")
+        try:
+            webhook = Bitrix(Bitrix24.objects.get(name_webhook='one').webhook)
+            # webhook = Bitrix("https://b24-3kb71v.bitrix24.ru/rest/1/pkh1p9s7i4ylt49r/")
 
-        '''Звонки'''
+            '''Звонки'''
 
-        call_values = [{k: v for k, v in d.items() if k in [
-            'ID',
-            'PORTAL_USER_ID',
-            'CALL_TYPE',
-            'PHONE_NUMBER',
-            'CALL_DURATION',
-            'CALL_START_DATE',
-            'CALL_FAILED_CODE',
-            'COMMENT'
-        ]} for d in webhook.get_all('voximplant.statistic.get')]
+            call_values = [{k: v for k, v in d.items() if k in [
+                'ID',
+                'PORTAL_USER_ID',
+                'CALL_TYPE',
+                'PHONE_NUMBER',
+                'CALL_DURATION',
+                'CALL_START_DATE',
+                'CALL_FAILED_CODE',
+                'COMMENT'
+            ]} for d in webhook.get_all('voximplant.statistic.get')]
 
-        for call in call_values:
-            user_id = call.get('PORTAL_USER_ID')
-            print(user_id)
-            try:
-                user = callControl.objects.filter(ID_CALL=call.get('ID'))
+            for call in call_values:
+                user_id = call.get('PORTAL_USER_ID')
+                print(user_id)
+                try:
+                    user = callControl.objects.filter(ID_CALL=call.get('ID'))
 
-                if user.exists():
-                    user = user.first()
-                    user.PHONE_NUMBER = call.get('PHONE_NUMBER')
-                    user.DURATION = '{:02}:{:02}:{:02}'.format(int(call.get('CALL_DURATION')) // 3600, (int(call.get('CALL_DURATION')) % 3600) // 60, int(call.get('CALL_DURATION')) % 60)
-                    user.DateCreate = call.get('CALL_START_DATE')
-                    user.CALL_FAILED_CODE = call.get('CALL_FAILED_CODE')
-                    user.CALL_TYPE = call.get('CALL_TYPE')
-                    user.COMMENT = call.get('COMMENT')
-                    user.save()
-                else:
-                    callControl.objects.create(
-                        ID_CALL=call.get('ID'),
-                        bitrix_staff_id_id=user_id,
-                        PHONE_NUMBER=call.get('PHONE_NUMBER'),
-                        DURATION = '{:02}:{:02}:{:02}'.format(int(call.get('CALL_DURATION')) // 3600, (int(call.get('CALL_DURATION')) % 3600) // 60, int(call.get('CALL_DURATION')) % 60),
-                        DateCreate=call.get('CALL_START_DATE'),
-                        CALL_FAILED_CODE=call.get('CALL_FAILED_CODE'),
-                        CALL_TYPE=call.get('CALL_TYPE'),
-                        COMMENT=call.get('COMMENT')
-                    )
-            except CustomUser.DoesNotExist:
-                pass
+                    if user.exists():
+                        user = user.first()
+                        user.PHONE_NUMBER = call.get('PHONE_NUMBER')
+                        user.DURATION = '{:02}:{:02}:{:02}'.format(int(call.get('CALL_DURATION')) // 3600,
+                                                                   (int(call.get('CALL_DURATION')) % 3600) // 60,
+                                                                   int(call.get('CALL_DURATION')) % 60)
+                        user.DateCreate = call.get('CALL_START_DATE')
+                        user.CALL_FAILED_CODE = call.get('CALL_FAILED_CODE')
+                        user.CALL_TYPE = call.get('CALL_TYPE')
+                        user.COMMENT = call.get('COMMENT')
+                        user.save()
+                    else:
+                        callControl.objects.create(
+                            ID_CALL=call.get('ID'),
+                            bitrix_staff_id_id=user_id,
+                            PHONE_NUMBER=call.get('PHONE_NUMBER'),
+                            DURATION='{:02}:{:02}:{:02}'.format(int(call.get('CALL_DURATION')) // 3600,
+                                                                (int(call.get('CALL_DURATION')) % 3600) // 60,
+                                                                int(call.get('CALL_DURATION')) % 60),
+                            DateCreate=call.get('CALL_START_DATE'),
+                            CALL_FAILED_CODE=call.get('CALL_FAILED_CODE'),
+                            CALL_TYPE=call.get('CALL_TYPE'),
+                            COMMENT=call.get('COMMENT')
+                        )
+                except CustomUser.DoesNotExist:
+                    pass
 
-        '''Рабочее время'''
-        emp_values = [{k: v if k != 'UF_DEPARTMENT' else ', '.join(map(str, v)) for k, v in d.items() if
-                       k in ['ID', 'NAME', 'LAST_NAME', 'EMAIL', 'LAST_LOGIN', 'WORK_POSITION', 'UF_DEPARTMENT']} for d
-                      in webhook.get_all('user.get')]
-        user_id = [emp_values[i].get('ID') for i in range(len(emp_values))]
-        data_time = [{'ID': id, **result} for id, result in
-                     zip(user_id, [webhook.get_all('timeman.status', params={'USER_ID': int(id)}) for id in user_id])]
+            '''Рабочее время'''
+            emp_values = [{k: v if k != 'UF_DEPARTMENT' else ', '.join(map(str, v)) for k, v in d.items() if
+                           k in ['ID', 'NAME', 'LAST_NAME', 'EMAIL', 'LAST_LOGIN', 'WORK_POSITION', 'UF_DEPARTMENT']} for d
+                          in webhook.get_all('user.get')]
+            user_id = [emp_values[i].get('ID') for i in range(len(emp_values))]
+            data_time = [{'ID': id, **result} for id, result in
+                         zip(user_id, [webhook.get_all('timeman.status', params={'USER_ID': int(id)}) for id in user_id])]
 
-        for time in data_time:
-            user_id = time.get('ID')
-            print(user_id)
-            try:
-                user = TimeControl.objects.filter(bitrix_staff_id_id=user_id, START_TIME=time.get('TIME_START'))
+            for time in data_time:
+                user_id = time.get('ID')
+                print(user_id)
+                try:
+                    user = TimeControl.objects.filter(bitrix_staff_id_id=user_id, START_TIME=time.get('TIME_START'))
 
-                if user.exists():
-                    user = user.first()
-                    user.DURATION = time.get('DURATION')
-                    user.TIME_LEAKS = time.get('TIME_LEAKS')
-                    user.STATUS = time.get('STATUS')
-                    user.START_TIME = time.get('TIME_START')
-                    user.END_TIME = time.get('TIME_FINISH')
-                    user.save()
-                else:
-                    TimeControl.objects.create(
-                        bitrix_staff_id_id=user_id,
-                        DURATION=time.get('DURATION'),
-                        TIME_LEAKS=time.get('TIME_LEAKS'),
-                        STATUS=time.get('STATUS'),
-                        START_TIME=time.get('TIME_START'),
-                        END_TIME=time.get('TIME_FINISH')
-                    )
-            except CustomUser.DoesNotExist:
-                pass
+                    if user.exists():
+                        user = user.first()
+                        user.DURATION = time.get('DURATION')
+                        user.TIME_LEAKS = time.get('TIME_LEAKS')
+                        user.STATUS = time.get('STATUS')
+                        user.START_TIME = time.get('TIME_START')
+                        user.END_TIME = time.get('TIME_FINISH')
+                        user.save()
+                    else:
+                        TimeControl.objects.create(
+                            bitrix_staff_id_id=user_id,
+                            DURATION=time.get('DURATION'),
+                            TIME_LEAKS=time.get('TIME_LEAKS'),
+                            STATUS=time.get('STATUS'),
+                            START_TIME=time.get('TIME_START'),
+                            END_TIME=time.get('TIME_FINISH')
+                        )
+                except CustomUser.DoesNotExist:
+                    pass
 
-        '''Сотрудники'''
-        emp_values = [{k: v if k != 'UF_DEPARTMENT' else ', '.join(map(str, v)) for k, v in d.items() if
-                       k in ['ID', 'NAME', 'LAST_NAME', 'EMAIL', 'LAST_LOGIN', 'WORK_POSITION', 'UF_DEPARTMENT']} for d
-                      in webhook.get_all('user.get')]
+            '''Сотрудники'''
+            emp_values = [{k: v if k != 'UF_DEPARTMENT' else ', '.join(map(str, v)) for k, v in d.items() if
+                           k in ['ID', 'NAME', 'LAST_NAME', 'EMAIL', 'LAST_LOGIN', 'WORK_POSITION', 'UF_DEPARTMENT']} for d
+                          in webhook.get_all('user.get')]
 
-        emp_values = [{**{k: v for k, v in case.items() if k != 'UF_DEPARTMENT'},
-                       'UF_DEPARTMENT': {department['ID']: department['NAME'] for department in
-                                         [{k: v for k, v in d.items() if k in ['ID', 'NAME']} for d in
-                                          webhook.get_all('department.get')]}.get(case['UF_DEPARTMENT'], None)} for case
-                      in emp_values]
+            emp_values = [{**{k: v for k, v in case.items() if k != 'UF_DEPARTMENT'},
+                           'UF_DEPARTMENT': {department['ID']: department['NAME'] for department in
+                                             [{k: v for k, v in d.items() if k in ['ID', 'NAME']} for d in
+                                              webhook.get_all('department.get')]}.get(case['UF_DEPARTMENT'], None)} for case
+                          in emp_values]
 
-        for data in emp_values:
-            user_id = data.get('ID')
-            try:
-                user = CustomUser.objects.filter(bitrix_staff_id=user_id)
+            for data in emp_values:
+                user_id = data.get('ID')
+                try:
+                    user = CustomUser.objects.filter(bitrix_staff_id=user_id)
 
-                if data.get('WORK_POSITION') == "Менеджер":
-                    user_type = 1
-                elif data.get('WORK_POSITION') == "Администратор":
-                    user_type = 1
-                else:
-                    user_type = 2
+                    if data.get('WORK_POSITION') == "Менеджер":
+                        user_type = 1
+                    elif data.get('WORK_POSITION') == "Администратор":
+                        user_type = 1
+                    else:
+                        user_type = 2
 
-                if user.exists():
-                    user = user.first()
-                    user.first_name = data.get('NAME')
-                    user.email = data.get('EMAIL')
-                    user.last_name = data.get('LAST_NAME')
-                    user.last_login = data.get('LAST_LOGIN')
-                    user.WORK_DEPARTMENT = data.get('UF_DEPARTMENT')
-                    user.WORK_POSITION = data.get('WORK_POSITION')
-                    user.user_type = user_type
-                    user.save()
-                else:
-                    CustomUser.objects.create(
-                        bitrix_staff_id=data.get('ID'),
-                        first_name=data.get('NAME'),
-                        email=data.get('EMAIL'),
-                        last_name=data.get('LAST_NAME'),
-                        last_login=data.get('LAST_LOGIN'),
-                        WORK_DEPARTMENT=data.get('UF_DEPARTMENT'),
-                        WORK_POSITION=data.get('WORK_POSITION'),
-                        user_type=user_type
-                    )
-            except CustomUser.DoesNotExist:
-                pass
+                    if user.exists():
+                        user = user.first()
+                        user.first_name = data.get('NAME')
+                        user.email = data.get('EMAIL')
+                        user.last_name = data.get('LAST_NAME')
+                        user.last_login = data.get('LAST_LOGIN')
+                        user.WORK_DEPARTMENT = data.get('UF_DEPARTMENT')
+                        user.WORK_POSITION = data.get('WORK_POSITION')
+                        user.user_type = user_type
+                        user.save()
+                    else:
+                        CustomUser.objects.create(
+                            bitrix_staff_id=data.get('ID'),
+                            first_name=data.get('NAME'),
+                            email=data.get('EMAIL'),
+                            last_name=data.get('LAST_NAME'),
+                            last_login=data.get('LAST_LOGIN'),
+                            WORK_DEPARTMENT=data.get('UF_DEPARTMENT'),
+                            WORK_POSITION=data.get('WORK_POSITION'),
+                            username='user_{}'.format(randint(1, 1000)),
+                            user_type=user_type
+                        )
+                except CustomUser.DoesNotExist:
+                    pass
 
-        '''Сделки'''
+            '''Сделки'''
 
-        # res = [{k: v for k, v in d.items() if
-        #         k in ['TITLE', 'DATE_CREATE', 'DATE_MODIFY', 'OPENED', 'TYPE_ID', 'ASSIGNED_BY_ID', 'CLOSEDATE']} for d
-        #        in webhook.get_all('crm.deal.list')]
-        #
-        # for i in range(len(res)):
-        #     assigned_by_id = res[i].get('ASSIGNED_BY_ID')
-        #     try:
-        #         custom_user = CustomUser.objects.get(bitrix_staff_id=assigned_by_id)
-        #         # Пытаемся получить сделку из базы данных по критериям
-        #         deal, created = Deal.objects.get_or_create(
-        #             title=res[i].get('TITLE'),
-        #             CLOSEDATE=res[i].get('CLOSEDATE'),
-        #             Status=res[i].get('OPENED'),
-        #             DATE_MODIFY=res[i].get('DATE_MODIFY'),
-        #             TYPE_ID=res[i].get('TYPE_ID'),
-        #             D ATE_CREATE=res[i].get('DATE_CREATE'),
-        #             bitrix_staff_id=custom_user
-        #         )
-        #         if not created:
-        #             # Если сделка уже существует, обновляем поля
-        #             deal.CLOSEDATE = res[i].get('CLOSEDATE')
-        #             deal.Status = res[i].get('OPENED')
-        #             deal.DATE_MODIFY = res[i].get('DATE_MODIFY')
-        #             deal.TYPE_ID = res[i].get('TYPE_ID')
-        #             deal.DATE_CREATE = res[i].get('DATE_CREATE')
-        #             deal.save()
-        #     except CustomUser.DoesNotExist:
-        #         # Если пользователь с таким bitrix_staff_id не найден, можно добавить соответствующую обработку ошибки или пропустить эту запись
-        #         pass
+            # res = [{k: v for k, v in d.items() if
+            #         k in ['TITLE', 'DATE_CREATE', 'DATE_MODIFY', 'OPENED', 'TYPE_ID', 'ASSIGNED_BY_ID', 'CLOSEDATE']} for d
+            #        in webhook.get_all('crm.deal.list')]
+            #
+            # for i in range(len(res)):
+            #     assigned_by_id = res[i].get('ASSIGNED_BY_ID')
+            #     try:
+            #         custom_user = CustomUser.objects.get(bitrix_staff_id=assigned_by_id)
+            #         # Пытаемся получить сделку из базы данных по критериям
+            #         deal, created = Deal.objects.get_or_create(
+            #             title=res[i].get('TITLE'),
+            #             CLOSEDATE=res[i].get('CLOSEDATE'),
+            #             Status=res[i].get('OPENED'),
+            #             DATE_MODIFY=res[i].get('DATE_MODIFY'),
+            #             TYPE_ID=res[i].get('TYPE_ID'),
+            #             D ATE_CREATE=res[i].get('DATE_CREATE'),
+            #             bitrix_staff_id=custom_user
+            #         )
+            #         if not created:
+            #             # Если сделка уже существует, обновляем поля
+            #             deal.CLOSEDATE = res[i].get('CLOSEDATE')
+            #             deal.Status = res[i].get('OPENED')
+            #             deal.DATE_MODIFY = res[i].get('DATE_MODIFY')
+            #             deal.TYPE_ID = res[i].get('TYPE_ID')
+            #             deal.DATE_CREATE = res[i].get('DATE_CREATE')
+            #             deal.save()
+            #     except CustomUser.DoesNotExist:
+            #         # Если пользователь с таким bitrix_staff_id не найден, можно добавить соответствующую обработку ошибки или пропустить эту запись
+            #         pass
 
-        '''Дела'''
+            '''Дела'''
 
-        # case_new_values = [{k: v for k, v in d.items() if
-        #                     k in ['RESPONSIBLE_ID', 'DESCRIPTION', 'CREATED', 'LAST_UPDATED', 'COMPLETED', 'START_TIME',
-        #                           'END_TIME', 'DEADLINE']} for d in webhook.get_all('crm.activity.list')]
-        # for i in range(len(case_new_values)):
-        #     responsible_id = case_new_values[i].get('RESPONSIBLE_ID')
-        #     try:
-        #         custom_user = CustomUser.objects.get(bitrix_staff_id=responsible_id)
-        #         # Если пользователь найден, создаем или обновляем запись Case
-        #         case, created = Case.objects.get_or_create(
-        #             DESCRIPTION=case_new_values[i].get('DESCRIPTION'),
-        #             CREATED=case_new_values[i].get('CREATED'),
-        #             LAST_UPDATED=case_new_values[i].get('LAST_UPDATED'),
-        #             COMPLETED=case_new_values[i].get('COMPLETED'),
-        #             START_TIME=None,
-        #             END_TIME=None,
-        #             DEADLINE=case_new_values[i].get('DEADLINE'),
-        #             bitrix_staff_id=custom_user
-        #         )
-        #         if not created:
-        #             # Обновляем поля, если запись уже существует
-        #             case.DESCRIPTION = case_new_values[i].get('DESCRIPTION')
-        #             case.CREATED = case_new_values[i].get('CREATED')
-        #             case.LAST_UPDATED = case_new_values[i].get('LAST_UPDATED')
-        #             case.COMPLETED = case_new_values[i].get('COMPLETED')
-        #             case.DEADLINE = case_new_values[i].get('DEADLINE')
-        #             case.save()
-        #     except CustomUser.DoesNotExist:
-        #         # Если пользователь с таким bitrix_staff_id не найден, можно добавить соответствующую обработку ошибки или пропустить эту запись
-        #         pass
+            # case_new_values = [{k: v for k, v in d.items() if
+            #                     k in ['RESPONSIBLE_ID', 'DESCRIPTION', 'CREATED', 'LAST_UPDATED', 'COMPLETED', 'START_TIME',
+            #                           'END_TIME', 'DEADLINE']} for d in webhook.get_all('crm.activity.list')]
+            # for i in range(len(case_new_values)):
+            #     responsible_id = case_new_values[i].get('RESPONSIBLE_ID')
+            #     try:
+            #         custom_user = CustomUser.objects.get(bitrix_staff_id=responsible_id)
+            #         # Если пользователь найден, создаем или обновляем запись Case
+            #         case, created = Case.objects.get_or_create(
+            #             DESCRIPTION=case_new_values[i].get('DESCRIPTION'),
+            #             CREATED=case_new_values[i].get('CREATED'),
+            #             LAST_UPDATED=case_new_values[i].get('LAST_UPDATED'),
+            #             COMPLETED=case_new_values[i].get('COMPLETED'),
+            #             START_TIME=None,
+            #             END_TIME=None,
+            #             DEADLINE=case_new_values[i].get('DEADLINE'),
+            #             bitrix_staff_id=custom_user
+            #         )
+            #         if not created:
+            #             # Обновляем поля, если запись уже существует
+            #             case.DESCRIPTION = case_new_values[i].get('DESCRIPTION')
+            #             case.CREATED = case_new_values[i].get('CREATED')
+            #             case.LAST_UPDATED = case_new_values[i].get('LAST_UPDATED')
+            #             case.COMPLETED = case_new_values[i].get('COMPLETED')
+            #             case.DEADLINE = case_new_values[i].get('DEADLINE')
+            #             case.save()
+            #     except CustomUser.DoesNotExist:
+            #         # Если пользователь с таким bitrix_staff_id не найден, можно добавить соответствующую обработку ошибки или пропустить эту запись
+            #         pass
 
-        '''Задачи'''
+            '''Задачи'''
 
-        case_new_values = [{k: v for k, v in d.items() if
-                            k in ['ID', 'RESPONSIBLE_ID', 'TITLE', 'DESCRIPTION', 'PRIORITY', 'REAL_STATUS', 'STATUS',
-                                  'DEADLINE', 'TIME_ESTIMATE', 'CREATED_DATE', 'GROUP_ID']} for d in
-                           webhook.get_all('task.item.list')]
+            case_new_values = [{k: v for k, v in d.items() if
+                                k in ['ID', 'RESPONSIBLE_ID', 'TITLE', 'DESCRIPTION', 'PRIORITY', 'REAL_STATUS', 'STATUS',
+                                      'DEADLINE', 'TIME_ESTIMATE', 'CREATED_DATE', 'GROUP_ID']} for d in
+                               webhook.get_all('task.item.list')]
 
-        case_new_values = [{**{k: v for k, v in case.items() if k != 'GROUP_ID'},
-                            'GROUP_ID': {department['ID']: department['NAME'] for department in
-                                         [{k: v for k, v in d.items() if k in ['ID', 'NAME']} for d in
-                                          webhook.get_all('sonet_group.get')]}.get(case['GROUP_ID'], None)} for case in
-                           case_new_values]
+            case_new_values = [{**{k: v for k, v in case.items() if k != 'GROUP_ID'},
+                                'GROUP_ID': {department['ID']: department['NAME'] for department in
+                                             [{k: v for k, v in d.items() if k in ['ID', 'NAME']} for d in
+                                              webhook.get_all('sonet_group.get')]}.get(case['GROUP_ID'], None)} for case in
+                               case_new_values]
 
-        for case in case_new_values:
-            task_id = case.get('ID')
-            responsible_id = case.get('RESPONSIBLE_ID')
+            for case in case_new_values:
+                task_id = case.get('ID')
+                responsible_id = case.get('RESPONSIBLE_ID')
 
-            try:
-                custom_user = CustomUser.objects.get(bitrix_staff_id=responsible_id)
-                DEADLINE = case.get('DEADLINE') if case.get('DEADLINE') != "" else None
-                CREATED_DATE = case.get('CREATED_DATE') if case.get('CREATED_DATE') != "" else None
+                try:
+                    custom_user = CustomUser.objects.get(bitrix_staff_id=responsible_id)
+                    DEADLINE = case.get('DEADLINE') if case.get('DEADLINE') != "" else None
+                    CREATED_DATE = case.get('CREATED_DATE') if case.get('CREATED_DATE') != "" else None
 
-                # Попытка получить задачи по ID_TASK
-                tasks = TaskControl.objects.filter(ID_TASK=task_id)
+                    # Попытка получить задачи по ID_TASK
+                    tasks = TaskControl.objects.filter(ID_TASK=task_id)
 
-                if tasks.exists():
-                    # Обновление атрибутов первой найденной задачи
-                    task = tasks.first()
-                    task.TITLE = case.get('TITLE')
-                    task.DESCRIPTION = case.get('DESCRIPTION')
-                    task.PRIORITY = case.get('PRIORITY')
-                    task.STATUS = case.get('REAL_STATUS')
-                    task.SUBSTATUS = case.get('STATUS')
-                    task.DEADLINE = DEADLINE
-                    task.TIME_ESTIMATE = case.get('TIME_ESTIMATE')
-                    task.CREATED_DATE = CREATED_DATE
-                    task.GROUP_PROJECTS = case.get('GROUP_ID')
-                    task.bitrix_staff_id = custom_user
-                    task.save()
-                else:
-                    # Создание новой задачи
-                    TaskControl.objects.create(
-                        ID_TASK=task_id,
-                        TITLE=case.get('TITLE'),
-                        DESCRIPTION=case.get('DESCRIPTION'),
-                        PRIORITY=case.get('PRIORITY'),
-                        STATUS=case.get('REAL_STATUS'),
-                        SUBSTATUS=case.get('STATUS'),
-                        DEADLINE=DEADLINE,
-                        TIME_ESTIMATE=case.get('TIME_ESTIMATE'),
-                        CREATED_DATE=CREATED_DATE,
-                        GROUP_PROJECTS=case.get('GROUP_ID'),
-                        bitrix_staff_id=custom_user
-                    )
+                    if tasks.exists():
+                        # Обновление атрибутов первой найденной задачи
+                        task = tasks.first()
+                        task.TITLE = case.get('TITLE')
+                        task.DESCRIPTION = case.get('DESCRIPTION')
+                        task.PRIORITY = case.get('PRIORITY')
+                        task.STATUS = case.get('REAL_STATUS')
+                        task.SUBSTATUS = case.get('STATUS')
+                        task.DEADLINE = DEADLINE
+                        task.TIME_ESTIMATE = case.get('TIME_ESTIMATE')
+                        task.CREATED_DATE = CREATED_DATE
+                        task.GROUP_PROJECTS = case.get('GROUP_ID')
+                        task.bitrix_staff_id = custom_user
+                        task.save()
+                    else:
+                        # Создание новой задачи
+                        TaskControl.objects.create(
+                            ID_TASK=task_id,
+                            TITLE=case.get('TITLE'),
+                            DESCRIPTION=case.get('DESCRIPTION'),
+                            PRIORITY=case.get('PRIORITY'),
+                            STATUS=case.get('REAL_STATUS'),
+                            SUBSTATUS=case.get('STATUS'),
+                            DEADLINE=DEADLINE,
+                            TIME_ESTIMATE=case.get('TIME_ESTIMATE'),
+                            CREATED_DATE=CREATED_DATE,
+                            GROUP_PROJECTS=case.get('GROUP_ID'),
+                            bitrix_staff_id=custom_user
+                        )
 
-            except CustomUser.DoesNotExist:
-                # Если пользователь с таким bitrix_staff_id не найден, можно добавить соответствующую обработку ошибки или пропустить эту запись
-                pass
+                except CustomUser.DoesNotExist:
+                    # Если пользователь с таким bitrix_staff_id не найден, можно добавить соответствующую обработку ошибки или пропустить эту запись
+                    pass
+        except Exception:
+            redirect('hod_home')
 
     staff_male = Staff.objects.filter(gender='Male').count()
     staff_female = Staff.objects.filter(gender='Female').count()
 
     prompt = "Cделай краткое резюме по последним изменениям: {}".format(analyzing_event)
 
-    import g4f
-    from g4f.Provider import (
-        FreeGpt,
-        FreeChatgpt,
-        AItianhu,
-        Aichat,
-        Bard,
-        Bing,
-        ChatBase,
-        ChatgptAi,
-        OpenaiChat,
-        Vercel,
-        You,
-        Yqcloud,
-        HuggingChat,
-        OpenAssistant,
-    )
+    try:
+        import g4f
+        from g4f.Provider import (FreeGpt, FreeChatgpt)
 
-    g4f.debug.logging = True  # enable logging
-    g4f.check_version = False  # Disable automatic version checking
+        g4f.debug.logging = True  # enable logging
+        g4f.check_version = False  # Disable automatic version checking
 
-    g4f_request = g4f.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "user", "content": prompt},
-        ],
-        provider=g4f.Provider.FreeGpt
-    )
+        g4f_request = g4f.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            provider=g4f.Provider.FreeChatgpt
+        )
+    except Exception:
+        redirect('hod_home')
 
-    print(g4f_request)
     response = g4f_request
 
     context = {
@@ -859,6 +882,206 @@ def NEW_WEBHOOK(request):
     else:
         Bitrix24.objects.filter(name_webhook='one').update(webhook=request.POST.get("WEBHOOK"))
         messages.success(request, "Вы успешно изменили webhook")
+
+        if Bitrix24.objects.get(name_webhook='one').webhook == '':
+            redirect('hod_home')
+        else:
+            webhook = Bitrix(Bitrix24.objects.get(name_webhook='one').webhook)
+
+            '''Сотрудники'''
+            emp_values = [{k: v if k != 'UF_DEPARTMENT' else ', '.join(map(str, v)) for k, v in d.items() if
+                           k in ['ID', 'NAME', 'LAST_NAME', 'EMAIL', 'LAST_LOGIN', 'WORK_POSITION', 'UF_DEPARTMENT']}
+                          for d
+                          in webhook.get_all('user.get')]
+
+            emp_values = [{**{k: v for k, v in case.items() if k != 'UF_DEPARTMENT'},
+                           'UF_DEPARTMENT': {department['ID']: department['NAME'] for department in
+                                             [{k: v for k, v in d.items() if k in ['ID', 'NAME']} for d in
+                                              webhook.get_all('department.get')]}.get(case['UF_DEPARTMENT'], None)} for
+                          case
+                          in emp_values]
+
+            for data in emp_values:
+                user_id = data.get('ID')
+                try:
+                    user = CustomUser.objects.filter(bitrix_staff_id=user_id)
+
+                    if data.get('WORK_POSITION') == "Менеджер":
+                        user_type = 1
+                    elif data.get('WORK_POSITION') == "Администратор":
+                        user_type = 1
+                    else:
+                        user_type = 2
+
+                    if user.exists():
+                        user = user.first()
+                        user.first_name = data.get('NAME')
+                        user.email = data.get('EMAIL')
+                        user.last_name = data.get('LAST_NAME')
+                        user.last_login = data.get('LAST_LOGIN')
+                        user.WORK_DEPARTMENT = data.get('UF_DEPARTMENT')
+                        user.WORK_POSITION = data.get('WORK_POSITION')
+                        user.user_type = user_type
+                        user.save()
+                    else:
+                        CustomUser.objects.create(
+                            bitrix_staff_id=data.get('ID'),
+                            first_name=data.get('NAME'),
+                            email=data.get('EMAIL'),
+                            last_name=data.get('LAST_NAME'),
+                            last_login=data.get('LAST_LOGIN'),
+                            WORK_DEPARTMENT=data.get('UF_DEPARTMENT'),
+                            WORK_POSITION=data.get('WORK_POSITION'),
+                            username='user_{}'.format(randint(1, 10000)),
+                            user_type=user_type
+                        )
+                except CustomUser.DoesNotExist:
+                    pass
+
+            '''Звонки'''
+
+            call_values = [{k: v for k, v in d.items() if k in [
+                'ID',
+                'PORTAL_USER_ID',
+                'CALL_TYPE',
+                'PHONE_NUMBER',
+                'CALL_DURATION',
+                'CALL_START_DATE',
+                'CALL_FAILED_CODE',
+                'COMMENT'
+            ]} for d in webhook.get_all('voximplant.statistic.get')]
+
+            for call in call_values:
+                user_id = call.get('PORTAL_USER_ID')
+                print(user_id)
+                try:
+                    user = callControl.objects.filter(ID_CALL=call.get('ID'))
+
+                    if user.exists():
+                        user = user.first()
+                        user.PHONE_NUMBER = call.get('PHONE_NUMBER')
+                        user.DURATION = '{:02}:{:02}:{:02}'.format(int(call.get('CALL_DURATION')) // 3600,
+                                                                   (int(call.get('CALL_DURATION')) % 3600) // 60,
+                                                                   int(call.get('CALL_DURATION')) % 60)
+                        user.DateCreate = call.get('CALL_START_DATE')
+                        user.CALL_FAILED_CODE = call.get('CALL_FAILED_CODE')
+                        user.CALL_TYPE = call.get('CALL_TYPE')
+                        user.COMMENT = call.get('COMMENT')
+                        user.save()
+                    else:
+                        callControl.objects.create(
+                            ID_CALL=call.get('ID'),
+                            bitrix_staff_id_id=user_id,
+                            PHONE_NUMBER=call.get('PHONE_NUMBER'),
+                            DURATION='{:02}:{:02}:{:02}'.format(int(call.get('CALL_DURATION')) // 3600,
+                                                                (int(call.get('CALL_DURATION')) % 3600) // 60,
+                                                                int(call.get('CALL_DURATION')) % 60),
+                            DateCreate=call.get('CALL_START_DATE'),
+                            CALL_FAILED_CODE=call.get('CALL_FAILED_CODE'),
+                            CALL_TYPE=call.get('CALL_TYPE'),
+                            COMMENT=call.get('COMMENT')
+                        )
+                except CustomUser.DoesNotExist:
+                    pass
+
+            '''Рабочее время'''
+            emp_values = [{k: v if k != 'UF_DEPARTMENT' else ', '.join(map(str, v)) for k, v in d.items() if
+                           k in ['ID', 'NAME', 'LAST_NAME', 'EMAIL', 'LAST_LOGIN', 'WORK_POSITION', 'UF_DEPARTMENT']}
+                          for d
+                          in webhook.get_all('user.get')]
+            user_id = [emp_values[i].get('ID') for i in range(len(emp_values))]
+            data_time = [{'ID': id, **result} for id, result in
+                         zip(user_id,
+                             [webhook.get_all('timeman.status', params={'USER_ID': int(id)}) for id in user_id])]
+
+            for time in data_time:
+                user_id = time.get('ID')
+                print(user_id)
+                try:
+                    user = TimeControl.objects.filter(bitrix_staff_id_id=user_id, START_TIME=time.get('TIME_START'))
+
+                    if user.exists():
+                        user = user.first()
+                        user.DURATION = time.get('DURATION')
+                        user.TIME_LEAKS = time.get('TIME_LEAKS')
+                        user.STATUS = time.get('STATUS')
+                        user.START_TIME = time.get('TIME_START')
+                        user.END_TIME = time.get('TIME_FINISH')
+                        user.save()
+                    else:
+                        TimeControl.objects.create(
+                            bitrix_staff_id_id=user_id,
+                            DURATION=time.get('DURATION'),
+                            TIME_LEAKS=time.get('TIME_LEAKS'),
+                            STATUS=time.get('STATUS'),
+                            START_TIME=time.get('TIME_START'),
+                            END_TIME=time.get('TIME_FINISH')
+                        )
+                except CustomUser.DoesNotExist:
+                    pass
+
+
+            '''Задачи'''
+
+            case_new_values = [{k: v for k, v in d.items() if
+                                k in ['ID', 'RESPONSIBLE_ID', 'TITLE', 'DESCRIPTION', 'PRIORITY', 'REAL_STATUS',
+                                      'STATUS',
+                                      'DEADLINE', 'TIME_ESTIMATE', 'CREATED_DATE', 'GROUP_ID']} for d in
+                               webhook.get_all('task.item.list')]
+
+            case_new_values = [{**{k: v for k, v in case.items() if k != 'GROUP_ID'},
+                                'GROUP_ID': {department['ID']: department['NAME'] for department in
+                                             [{k: v for k, v in d.items() if k in ['ID', 'NAME']} for d in
+                                              webhook.get_all('sonet_group.get')]}.get(case['GROUP_ID'], None)} for case
+                               in
+                               case_new_values]
+
+            for case in case_new_values:
+                task_id = case.get('ID')
+                responsible_id = case.get('RESPONSIBLE_ID')
+
+                try:
+                    custom_user = CustomUser.objects.get(bitrix_staff_id=responsible_id)
+                    DEADLINE = case.get('DEADLINE') if case.get('DEADLINE') != "" else None
+                    CREATED_DATE = case.get('CREATED_DATE') if case.get('CREATED_DATE') != "" else None
+
+                    # Попытка получить задачи по ID_TASK
+                    tasks = TaskControl.objects.filter(ID_TASK=task_id)
+
+                    if tasks.exists():
+                        # Обновление атрибутов первой найденной задачи
+                        task = tasks.first()
+                        task.TITLE = case.get('TITLE')
+                        task.DESCRIPTION = case.get('DESCRIPTION')
+                        task.PRIORITY = case.get('PRIORITY')
+                        task.STATUS = case.get('REAL_STATUS')
+                        task.SUBSTATUS = case.get('STATUS')
+                        task.DEADLINE = DEADLINE
+                        task.TIME_ESTIMATE = case.get('TIME_ESTIMATE')
+                        task.CREATED_DATE = CREATED_DATE
+                        task.GROUP_PROJECTS = case.get('GROUP_ID')
+                        task.bitrix_staff_id = custom_user
+                        task.save()
+                    else:
+                        # Создание новой задачи
+                        TaskControl.objects.create(
+                            ID_TASK=task_id,
+                            TITLE=case.get('TITLE'),
+                            DESCRIPTION=case.get('DESCRIPTION'),
+                            PRIORITY=case.get('PRIORITY'),
+                            STATUS=case.get('REAL_STATUS'),
+                            SUBSTATUS=case.get('STATUS'),
+                            DEADLINE=DEADLINE,
+                            TIME_ESTIMATE=case.get('TIME_ESTIMATE'),
+                            CREATED_DATE=CREATED_DATE,
+                            GROUP_PROJECTS=case.get('GROUP_ID'),
+                            bitrix_staff_id=custom_user
+                        )
+
+                except CustomUser.DoesNotExist:
+                    # Если пользователь с таким bitrix_staff_id не найден, можно добавить соответствующую обработку ошибки или пропустить эту запись
+                    pass
+
     return redirect('add_bitrix24')
 
 
@@ -900,9 +1123,10 @@ def TASKCONTROL(request):
             'DEADLINE',
             'TIME_ESTIMATE',
             'CREATED_DATE',
-            'GROUP_ID']} for d in  webhook.get_all('task.item.list')]
+            'GROUP_ID']} for d in webhook.get_all('task.item.list')]
 
-        task_new_values = [{**{k: v for k, v in case.items() if k != 'GROUP_ID'},'GROUP_ID': {department['ID']: department['NAME'] for department in
+        task_new_values = [{**{k: v for k, v in case.items() if k != 'GROUP_ID'},
+                            'GROUP_ID': {department['ID']: department['NAME'] for department in
                                          [{k: v for k, v in d.items() if k in ['ID', 'NAME']} for d in
                                           webhook.get_all('sonet_group.get')]}.get(case['GROUP_ID'], None)} for case in
                            task_new]
@@ -1016,18 +1240,32 @@ def TASKCONTROL(request):
         }
 
     if request.user.user_type == '1':
-        deferred_count = task.filter(STATUS='6').count()
-        in_progress_count = task.filter(STATUS='3').count()
-        needs_rework_count = task.filter(STATUS='7').count()
-        completed_count = task.filter(STATUS='5').count()
 
-        newTask = task.filter(STATUS='1').count()
-        waitingTask = task.filter(STATUS='2').count()
-        presumably_completed = task.filter(STATUS='4').count()
+        try:
+            deferred_count = task.filter(STATUS='6').count()
+            in_progress_count = task.filter(STATUS='3').count()
+            needs_rework_count = task.filter(STATUS='7').count()
+            completed_count = task.filter(STATUS='5').count()
 
-        task_almost_overdue = task.filter(SUBSTATUS='-3').count()
-        unreviewed_task = task.filter(SUBSTATUS='-2').count()
-        overdue_task = task.filter(SUBSTATUS='-1').count()
+            newTask = task.filter(STATUS='1').count()
+            waitingTask = task.filter(STATUS='2').count()
+            presumably_completed = task.filter(STATUS='4').count()
+
+            task_almost_overdue = task.filter(SUBSTATUS='-3').count()
+            unreviewed_task = task.filter(SUBSTATUS='-2').count()
+            overdue_task = task.filter(SUBSTATUS='-1').count()
+        except Exception:
+            task = ''
+            deferred_count = 0
+            in_progress_count = 0
+            needs_rework_count = 0
+            completed_count = 0
+            newTask = 0
+            waitingTask = 0
+            presumably_completed = 0
+            task_almost_overdue = 0
+            unreviewed_task = 0
+            overdue_task = 0
 
     context = {
         "tasks_per_user": tasks_per_user,
@@ -1044,10 +1282,11 @@ def TASKCONTROL(request):
         "overdue_task": overdue_task,
         "current_user": request.user,
     }
+    print(context)
     return render(request, "Hod/taskControl.html", context)
 
-def TIMECONTROL(request):
 
+def TIMECONTROL(request):
     if Bitrix24.objects.get(name_webhook='one').webhook == '':
         redirect('hod_home')
     else:
@@ -1103,7 +1342,7 @@ def TIMECONTROL(request):
 
     select_type = ''
 
-    if request.method == 'POST' :
+    if request.method == 'POST':
         select_type = request.POST.get('select_type_period')
 
     if select_type == 'month':
@@ -1127,8 +1366,8 @@ def TIMECONTROL(request):
 
 from app.models import callControl
 
-def CALLCONTROL(request):
 
+def CALLCONTROL(request):
     global call, number_calls_less_30, number_calls_more_5, total_Incoming_calls, total_outgoing_calls, total_missed_calls, busy_calls, rejected_calls
 
     if Bitrix24.objects.get(name_webhook='one').webhook == '':
@@ -1158,7 +1397,8 @@ def CALLCONTROL(request):
                     user = user.first()
                     user.PHONE_NUMBER = call.get('PHONE_NUMBER')
                     user.DURATION = '{:02}:{:02}:{:02}'.format(
-                        int(call.get('CALL_DURATION')) // 3600, (int(call.get('CALL_DURATION')) % 3600) // 60, int(call.get('CALL_DURATION')) % 60)
+                        int(call.get('CALL_DURATION')) // 3600, (int(call.get('CALL_DURATION')) % 3600) // 60,
+                        int(call.get('CALL_DURATION')) % 60)
                     user.DateCreate = call.get('CALL_START_DATE')
                     user.CALL_FAILED_CODE = call.get('CALL_FAILED_CODE')
                     user.CALL_TYPE = call.get('CALL_TYPE')
@@ -1168,8 +1408,9 @@ def CALLCONTROL(request):
                         ID_CALL=call.get('ID'),
                         bitrix_staff_id_id=user_id,
                         PHONE_NUMBER=call.get('PHONE_NUMBER'),
-                        DURATION = '{:02}:{:02}:{:02}'.format(
-                            int(call.get('CALL_DURATION')) // 3600, (int(call.get('CALL_DURATION')) % 3600) // 60, int(call.get('CALL_DURATION')) % 60),
+                        DURATION='{:02}:{:02}:{:02}'.format(
+                            int(call.get('CALL_DURATION')) // 3600, (int(call.get('CALL_DURATION')) % 3600) // 60,
+                            int(call.get('CALL_DURATION')) % 60),
                         DateCreate=call.get('CALL_START_DATE'),
                         CALL_FAILED_CODE=call.get('CALL_FAILED_CODE'),
                         CALL_TYPE=call.get('CALL_TYPE'),
@@ -1244,532 +1485,552 @@ def CALLCONTROL(request):
             busy_calls = call.filter(CALL_FAILED_CODE='486').count(),
 
     print(call_per_user)
-    context = {
-        "call_per_user": call_per_user,
-        "number_calls_less_30": number_calls_less_30[0],
-        "number_calls_more_5": number_calls_more_5[0],
-        "total_Incoming_calls": total_Incoming_calls[0],
-        "total_outgoing_calls": total_outgoing_calls[0],
-        "total_missed_calls": total_missed_calls[0],
-        "rejected_calls": rejected_calls[0],
-        "busy_calls": busy_calls[0],
-        "current_user": request.user,  # Добавляем текущего пользователя в контекст
-        "call": call,
 
-    }
+    try:
+        context = {
+            "call_per_user": call_per_user,
+            "number_calls_less_30": number_calls_less_30[0],
+            "number_calls_more_5": number_calls_more_5[0],
+            "total_Incoming_calls": total_Incoming_calls[0],
+            "total_outgoing_calls": total_outgoing_calls[0],
+            "total_missed_calls": total_missed_calls[0],
+            "rejected_calls": rejected_calls[0],
+            "busy_calls": busy_calls[0],
+            "current_user": request.user,  # Добавляем текущего пользователя в контекст
+            "call": call,
+
+        }
+    except Exception:
+        context = {
+            "call_per_user": call_per_user,
+            "number_calls_less_30": '0',
+            "number_calls_more_5": '0',
+            "total_Incoming_calls": '0',
+            "total_outgoing_calls": '0',
+            "total_missed_calls": '0',
+            "rejected_calls": '0',
+            "busy_calls": '0',
+            "current_user": request.user,  # Добавляем текущего пользователя в контекст
+            "call": '',
+
+        }
     return render(request, "Hod/call_view.html", context)
 
 
 def chatbot_view(request, *args, **kwargs):
     global staff_id, first_name, last_name, customer, prompt
 
-    if request.method == 'POST':
-        select_report_type = request.POST.get('select_type_report')
-        select_type_staff = request.POST.get('select_type_staff')
-        select_departament = request.POST.get('select_departament')
+    try:
 
-        select_type_staff_split = select_type_staff.split()
-        first_name = select_type_staff_split[0]
-        last_name = select_type_staff_split[1]
+        if request.method == 'POST':
+            select_report_type = request.POST.get('select_type_report')
+            select_type_staff = request.POST.get('select_type_staff')
+            select_departament = request.POST.get('select_departament')
 
-        if select_departament != 'Отдел не выбран' and select_type_staff != "Сотрудник не выбран":
-            customer = CustomUser.objects.filter(
-                user_type=2,
-                WORK_DEPARTMENT=select_departament,
-                first_name=first_name,
-                last_name=last_name).values('first_name', 'last_name', 'WORK_POSITION', 'WORK_DEPARTMENT')
-            users = CustomUser.objects.filter(
-                user_type=2,
-                WORK_DEPARTMENT=select_departament)
-        elif select_departament == 'Отдел не выбран' and select_type_staff != "Сотрудник не выбран":
-            customer = CustomUser.objects.filter(
-                user_type=2,
-                first_name=first_name,
-                last_name=last_name).values('first_name', 'last_name', 'WORK_POSITION', 'WORK_DEPARTMENT')
-            users = CustomUser.objects.filter(user_type=2, first_name=first_name, last_name=last_name)
-        elif select_departament != 'Отдел не выбран' and select_type_staff == "Сотрудник не выбран":
-            customer = CustomUser.objects.filter(
-                user_type=2,
-                WORK_DEPARTMENT=select_departament).values('first_name', 'last_name', 'WORK_POSITION',
-                                                           'WORK_DEPARTMENT')
-            users = CustomUser.objects.filter(user_type=2, WORK_DEPARTMENT=select_departament)
-        else:
-            customer = CustomUser.objects.filter(
-                user_type=2).values('first_name', 'last_name', 'WORK_POSITION', 'WORK_DEPARTMENT')
-            users = CustomUser.objects.filter(user_type=2)
+            select_type_staff_split = select_type_staff.split()
+            first_name = select_type_staff_split[0]
+            last_name = select_type_staff_split[1]
 
-        print(customer)
-        print(select_report_type)
-        print(select_type_staff)
+            if select_departament != 'Отдел не выбран' and select_type_staff != "Сотрудник не выбран":
+                customer = CustomUser.objects.filter(
+                    user_type=2,
+                    WORK_DEPARTMENT=select_departament,
+                    first_name=first_name,
+                    last_name=last_name).values('first_name', 'last_name', 'WORK_POSITION', 'WORK_DEPARTMENT')
+                users = CustomUser.objects.filter(
+                    user_type=2,
+                    WORK_DEPARTMENT=select_departament)
+            elif select_departament == 'Отдел не выбран' and select_type_staff != "Сотрудник не выбран":
+                customer = CustomUser.objects.filter(
+                    user_type=2,
+                    first_name=first_name,
+                    last_name=last_name).values('first_name', 'last_name', 'WORK_POSITION', 'WORK_DEPARTMENT')
+                users = CustomUser.objects.filter(user_type=2, first_name=first_name, last_name=last_name)
+            elif select_departament != 'Отдел не выбран' and select_type_staff == "Сотрудник не выбран":
+                customer = CustomUser.objects.filter(
+                    user_type=2,
+                    WORK_DEPARTMENT=select_departament).values('first_name', 'last_name', 'WORK_POSITION',
+                                                               'WORK_DEPARTMENT')
+                users = CustomUser.objects.filter(user_type=2, WORK_DEPARTMENT=select_departament)
+            else:
+                customer = CustomUser.objects.filter(
+                    user_type=2).values('first_name', 'last_name', 'WORK_POSITION', 'WORK_DEPARTMENT')
+                users = CustomUser.objects.filter(user_type=2)
 
-        # genai.configure(api_key=os.getenv('KEY_MODEL_AI'))
-        #
-        # generation_config = {
-        #     "temperature": 0.9,
-        #     "top_p": 1,
-        #     "top_k": 1,
-        #     "max_output_tokens": 2048,
-        # }
-        #
-        # safety_settings = [
-        #     {
-        #         "category": "HARM_CATEGORY_HARASSMENT",
-        #         "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-        #     },
-        #     {
-        #         "category": "HARM_CATEGORY_HATE_SPEECH",
-        #         "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-        #     },
-        #     {
-        #         "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-        #         "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-        #     },
-        #     {
-        #         "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-        #         "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-        #     },
-        # ]
-        #
-        # model = genai.GenerativeModel(
-        #     model_name="gemini-1.0-pro",
-        #     generation_config=generation_config,
-        #     safety_settings=safety_settings
-        # )
+            print(customer)
+            print(select_report_type)
+            print(select_type_staff)
 
-        from datetime import datetime
-        import pandas as pd
+            # genai.configure(api_key=os.getenv('KEY_MODEL_AI'))
+            #
+            # generation_config = {
+            #     "temperature": 0.9,
+            #     "top_p": 1,
+            #     "top_k": 1,
+            #     "max_output_tokens": 2048,
+            # }
+            #
+            # safety_settings = [
+            #     {
+            #         "category": "HARM_CATEGORY_HARASSMENT",
+            #         "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            #     },
+            #     {
+            #         "category": "HARM_CATEGORY_HATE_SPEECH",
+            #         "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            #     },
+            #     {
+            #         "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            #         "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            #     },
+            #     {
+            #         "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+            #         "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            #     },
+            # ]
+            #
+            # model = genai.GenerativeModel(
+            #     model_name="gemini-1.0-pro",
+            #     generation_config=generation_config,
+            #     safety_settings=safety_settings
+            # )
 
-        anlazing_task = ''
-        anlazing_time = ''
-        anlazing_call = ''
-        anlazing_deal = ''
-        anlazing_case = ''
+            from datetime import datetime
+            import pandas as pd
 
-        if select_report_type != 'Отчёт не выбран':
-            if select_report_type == 'Отчет о проделанной работе за месяц':
-                anlazing_call = {' '.join((user.first_name, user.last_name)): {
-                    "calls_less_that_30_seconds_count": callControl.objects.filter(bitrix_staff_id=user,
-                                                                                   DURATION__lt='30',
-                                                                                   DateCreate__year=datetime.now().year,
-                                                                                   DateCreate__month=datetime.now().month).count(),
-                    "calls_more_that_5_minutes_count": callControl.objects.filter(bitrix_staff_id=user,
-                                                                                  DURATION__gt='300',
-                                                                                  DateCreate__year=datetime.now().year,
-                                                                                  DateCreate__month=datetime.now().month).count(),
-                    "total_Incoming_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_TYPE='1',
-                                                                             DateCreate__year=datetime.now().year,
-                                                                             DateCreate__month=datetime.now().month).count(),
-                    "total_outgoing_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_TYPE='2',
-                                                                             DateCreate__year=datetime.now().year,
-                                                                             DateCreate__month=datetime.now().month).count(),
-                    "total_missed_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='304',
+            anlazing_task = ''
+            anlazing_time = ''
+            anlazing_call = ''
+            anlazing_deal = ''
+            anlazing_case = ''
+
+            if select_report_type != 'Отчёт не выбран':
+                if select_report_type == 'Отчет о проделанной работе за месяц':
+                    anlazing_call = {' '.join((user.first_name, user.last_name)): {
+                        "calls_less_that_30_seconds_count": callControl.objects.filter(bitrix_staff_id=user,
+                                                                                       DURATION__lt='30',
+                                                                                       DateCreate__year=datetime.now().year,
+                                                                                       DateCreate__month=datetime.now().month).count(),
+                        "calls_more_that_5_minutes_count": callControl.objects.filter(bitrix_staff_id=user,
+                                                                                      DURATION__gt='300',
+                                                                                      DateCreate__year=datetime.now().year,
+                                                                                      DateCreate__month=datetime.now().month).count(),
+                        "total_Incoming_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_TYPE='1',
+                                                                                 DateCreate__year=datetime.now().year,
+                                                                                 DateCreate__month=datetime.now().month).count(),
+                        "total_outgoing_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_TYPE='2',
+                                                                                 DateCreate__year=datetime.now().year,
+                                                                                 DateCreate__month=datetime.now().month).count(),
+                        "total_missed_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='304',
+                                                                               DateCreate__year=datetime.now().year,
+                                                                               DateCreate__month=datetime.now().month).count(),
+
+                        "rejected_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='603',
                                                                            DateCreate__year=datetime.now().year,
-                                                                           DateCreate__month=datetime.now().month).count(),
-
-                    "rejected_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='603',
+                                                                           DateCreate__week=datetime.now().month).count(),
+                        "busy_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='486',
                                                                        DateCreate__year=datetime.now().year,
                                                                        DateCreate__week=datetime.now().month).count(),
-                    "busy_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='486',
-                                                                   DateCreate__year=datetime.now().year,
-                                                                   DateCreate__week=datetime.now().month).count(),
-                }
-                    for user in users
-                }
+                    }
+                        for user in users
+                    }
 
-                anlazing_task = {' '.join((user.first_name, user.last_name)): {
-                    "tasks_deferred_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='6',
-                                                                       CREATED_DATE__year=datetime.now().year,
-                                                                       CREATED_DATE__month=datetime.now().month).count(),
-                    "tasks_in_progress_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='3',
-                                                                          CREATED_DATE__year=datetime.now().year,
-                                                                          CREATED_DATE__month=datetime.now().month).count(),
-                    "tasks_needs_rework_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='7',
+                    anlazing_task = {' '.join((user.first_name, user.last_name)): {
+                        "tasks_deferred_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='6',
                                                                            CREATED_DATE__year=datetime.now().year,
                                                                            CREATED_DATE__month=datetime.now().month).count(),
-                    "tasks_overdue_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='5',
-                                                                      CREATED_DATE__year=datetime.now().year,
-                                                                      CREATED_DATE__month=datetime.now().month).count(),
-
-                    "tasks_newTask_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='1',
-                                                                      CREATED_DATE__year=datetime.now().year,
-                                                                      CREATED_DATE__month=datetime.now().month).count(),
-                    "tasks_waitingTask_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='2',
+                        "tasks_in_progress_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='3',
+                                                                              CREATED_DATE__year=datetime.now().year,
+                                                                              CREATED_DATE__month=datetime.now().month).count(),
+                        "tasks_needs_rework_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='7',
+                                                                               CREATED_DATE__year=datetime.now().year,
+                                                                               CREATED_DATE__month=datetime.now().month).count(),
+                        "tasks_overdue_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='5',
                                                                           CREATED_DATE__year=datetime.now().year,
                                                                           CREATED_DATE__month=datetime.now().month).count(),
-                    "tasks_presumably_completed_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='4',
-                                                                                   CREATED_DATE__year=datetime.now().year,
-                                                                                   CREATED_DATE__month=datetime.now().month).count(),
-                } for user in users}
 
-                anlazing_time = {' '.join((user.first_name, user.last_name)): {
-                    "time": TimeControl.objects.filter(bitrix_staff_id=user, START_TIME__year=datetime.now().year,
-                                                       START_TIME__month=datetime.now().month).values('TIME_LEAKS',
-                                                                                                      'DURATION')
-                } for user in users}
+                        "tasks_newTask_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='1',
+                                                                          CREATED_DATE__year=datetime.now().year,
+                                                                          CREATED_DATE__month=datetime.now().month).count(),
+                        "tasks_waitingTask_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='2',
+                                                                              CREATED_DATE__year=datetime.now().year,
+                                                                              CREATED_DATE__month=datetime.now().month).count(),
+                        "tasks_presumably_completed_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='4',
+                                                                                       CREATED_DATE__year=datetime.now().year,
+                                                                                       CREATED_DATE__month=datetime.now().month).count(),
+                    } for user in users}
 
-            elif select_report_type == 'Отчет о проделанной работе за день':
-                anlazing_call = {' '.join((user.first_name, user.last_name)): {
-                    "calls_less_that_30_seconds_count": callControl.objects.filter(bitrix_staff_id=user,
-                                                                                   DURATION__lt='30',
-                                                                                   DateCreate__year=datetime.now().year,
-                                                                                   DateCreate__month=datetime.now().month,
-                                                                                   DateCreate__day=datetime.now().day).count(),
-                    "calls_more_that_5_minutes_count": callControl.objects.filter(bitrix_staff_id=user,
-                                                                                  DURATION__gt='300',
-                                                                                  DateCreate__year=datetime.now().year,
-                                                                                  DateCreate__month=datetime.now().month,
-                                                                                  DateCreate__day=datetime.now().day).count(),
-                    "total_Incoming_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_TYPE='1',
-                                                                             DateCreate__year=datetime.now().year,
-                                                                             DateCreate__month=datetime.now().month,
-                                                                             DateCreate__day=datetime.now().day).count(),
-                    "total_outgoing_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_TYPE='2',
-                                                                             DateCreate__year=datetime.now().year,
-                                                                             DateCreate__month=datetime.now().month,
-                                                                             DateCreate__day=datetime.now().day).count(),
-                    "total_missed_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='304',
+                    anlazing_time = {' '.join((user.first_name, user.last_name)): {
+                        "time": TimeControl.objects.filter(bitrix_staff_id=user, START_TIME__year=datetime.now().year,
+                                                           START_TIME__month=datetime.now().month).values('TIME_LEAKS',
+                                                                                                          'DURATION')
+                    } for user in users}
+
+                elif select_report_type == 'Отчет о проделанной работе за день':
+                    anlazing_call = {' '.join((user.first_name, user.last_name)): {
+                        "calls_less_that_30_seconds_count": callControl.objects.filter(bitrix_staff_id=user,
+                                                                                       DURATION__lt='30',
+                                                                                       DateCreate__year=datetime.now().year,
+                                                                                       DateCreate__month=datetime.now().month,
+                                                                                       DateCreate__day=datetime.now().day).count(),
+                        "calls_more_that_5_minutes_count": callControl.objects.filter(bitrix_staff_id=user,
+                                                                                      DURATION__gt='300',
+                                                                                      DateCreate__year=datetime.now().year,
+                                                                                      DateCreate__month=datetime.now().month,
+                                                                                      DateCreate__day=datetime.now().day).count(),
+                        "total_Incoming_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_TYPE='1',
+                                                                                 DateCreate__year=datetime.now().year,
+                                                                                 DateCreate__month=datetime.now().month,
+                                                                                 DateCreate__day=datetime.now().day).count(),
+                        "total_outgoing_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_TYPE='2',
+                                                                                 DateCreate__year=datetime.now().year,
+                                                                                 DateCreate__month=datetime.now().month,
+                                                                                 DateCreate__day=datetime.now().day).count(),
+                        "total_missed_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='304',
+                                                                               DateCreate__year=datetime.now().year,
+                                                                               DateCreate__month=datetime.now().month,
+                                                                               DateCreate__day=datetime.now().day).count(),
+
+                        "rejected_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='603',
                                                                            DateCreate__year=datetime.now().year,
                                                                            DateCreate__month=datetime.now().month,
-                                                                           DateCreate__day=datetime.now().day).count(),
-
-                    "rejected_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='603',
+                                                                           DateCreate__week=datetime.now().day).count(),
+                        "busy_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='486',
                                                                        DateCreate__year=datetime.now().year,
                                                                        DateCreate__month=datetime.now().month,
                                                                        DateCreate__week=datetime.now().day).count(),
-                    "busy_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='486',
-                                                                   DateCreate__year=datetime.now().year,
-                                                                   DateCreate__month=datetime.now().month,
-                                                                   DateCreate__week=datetime.now().day).count(),
-                }
-                    for user in users
-                }
+                    }
+                        for user in users
+                    }
 
-                anlazing_task = {' '.join((user.first_name, user.last_name)): {
-                    "tasks_deferred_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='6',
-                                                                       CREATED_DATE__year=datetime.now().year,
-                                                                       CREATED_DATE__month=datetime.now().month,
-                                                                       CREATED_DATE__day=datetime.now().day).count(),
-                    "tasks_in_progress_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='3',
-                                                                          CREATED_DATE__year=datetime.now().year,
-                                                                          CREATED_DATE__month=datetime.now().month,
-                                                                          CREATED_DATE__day=datetime.now().day).count(),
-                    "tasks_needs_rework_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='7',
+                    anlazing_task = {' '.join((user.first_name, user.last_name)): {
+                        "tasks_deferred_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='6',
                                                                            CREATED_DATE__year=datetime.now().year,
                                                                            CREATED_DATE__month=datetime.now().month,
                                                                            CREATED_DATE__day=datetime.now().day).count(),
-                    "tasks_overdue_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='5',
-                                                                      CREATED_DATE__year=datetime.now().year,
-                                                                      CREATED_DATE__month=datetime.now().month,
-                                                                      CREATED_DATE__day=datetime.now().day).count(),
-
-                    "tasks_newTask_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='1',
-                                                                      CREATED_DATE__year=datetime.now().year,
-                                                                      CREATED_DATE__month=datetime.now().month,
-                                                                      CREATED_DATE__day=datetime.now().day).count(),
-                    "tasks_waitingTask_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='2',
+                        "tasks_in_progress_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='3',
+                                                                              CREATED_DATE__year=datetime.now().year,
+                                                                              CREATED_DATE__month=datetime.now().month,
+                                                                              CREATED_DATE__day=datetime.now().day).count(),
+                        "tasks_needs_rework_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='7',
+                                                                               CREATED_DATE__year=datetime.now().year,
+                                                                               CREATED_DATE__month=datetime.now().month,
+                                                                               CREATED_DATE__day=datetime.now().day).count(),
+                        "tasks_overdue_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='5',
                                                                           CREATED_DATE__year=datetime.now().year,
                                                                           CREATED_DATE__month=datetime.now().month,
                                                                           CREATED_DATE__day=datetime.now().day).count(),
-                    "tasks_presumably_completed_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='4',
-                                                                                   CREATED_DATE__year=datetime.now().year,
-                                                                                   CREATED_DATE__month=datetime.now().month,
-                                                                                   CREATED_DATE__day=datetime.now().day).count(),
-                } for user in users}
 
-                anlazing_time = {' '.join((user.first_name, user.last_name)): {
-                    "time": TimeControl.objects.filter(bitrix_staff_id=user, START_TIME__year=datetime.now().year,
-                                                       START_TIME__month=datetime.now().month,
-                                                       START_TIME__day=datetime.now().day).values('TIME_LEAKS',
-                                                                                                  'DURATION')
-                } for user in users}
+                        "tasks_newTask_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='1',
+                                                                          CREATED_DATE__year=datetime.now().year,
+                                                                          CREATED_DATE__month=datetime.now().month,
+                                                                          CREATED_DATE__day=datetime.now().day).count(),
+                        "tasks_waitingTask_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='2',
+                                                                              CREATED_DATE__year=datetime.now().year,
+                                                                              CREATED_DATE__month=datetime.now().month,
+                                                                              CREATED_DATE__day=datetime.now().day).count(),
+                        "tasks_presumably_completed_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='4',
+                                                                                       CREATED_DATE__year=datetime.now().year,
+                                                                                       CREATED_DATE__month=datetime.now().month,
+                                                                                       CREATED_DATE__day=datetime.now().day).count(),
+                    } for user in users}
 
-            elif select_report_type == 'Отчет о проделанной работе за неделю':
-                anlazing_call = {' '.join((user.first_name, user.last_name)): {
-                    "calls_less_that_30_seconds_count": callControl.objects.filter(bitrix_staff_id=user,
-                                                                                   DURATION__lt='30',
-                                                                                   DateCreate__year=datetime.now().year,
-                                                                                   DateCreate__week=datetime.now().isocalendar().week).count(),
-                    "calls_more_that_5_minutes_count": callControl.objects.filter(bitrix_staff_id=user,
-                                                                                  DURATION__gt='300',
-                                                                                  DateCreate__year=datetime.now().year,
-                                                                                  DateCreate__week=datetime.now().isocalendar().week).count(),
-                    "total_Incoming_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_TYPE='1',
-                                                                             DateCreate__year=datetime.now().year,
-                                                                             DateCreate__week=datetime.now().isocalendar().week).count(),
-                    "total_outgoing_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_TYPE='2',
-                                                                             DateCreate__year=datetime.now().year,
-                                                                             DateCreate__week=datetime.now().isocalendar().week).count(),
-                    "total_missed_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='304',
+                    anlazing_time = {' '.join((user.first_name, user.last_name)): {
+                        "time": TimeControl.objects.filter(bitrix_staff_id=user, START_TIME__year=datetime.now().year,
+                                                           START_TIME__month=datetime.now().month,
+                                                           START_TIME__day=datetime.now().day).values('TIME_LEAKS',
+                                                                                                      'DURATION')
+                    } for user in users}
+
+                elif select_report_type == 'Отчет о проделанной работе за неделю':
+                    anlazing_call = {' '.join((user.first_name, user.last_name)): {
+                        "calls_less_that_30_seconds_count": callControl.objects.filter(bitrix_staff_id=user,
+                                                                                       DURATION__lt='30',
+                                                                                       DateCreate__year=datetime.now().year,
+                                                                                       DateCreate__week=datetime.now().isocalendar().week).count(),
+                        "calls_more_that_5_minutes_count": callControl.objects.filter(bitrix_staff_id=user,
+                                                                                      DURATION__gt='300',
+                                                                                      DateCreate__year=datetime.now().year,
+                                                                                      DateCreate__week=datetime.now().isocalendar().week).count(),
+                        "total_Incoming_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_TYPE='1',
+                                                                                 DateCreate__year=datetime.now().year,
+                                                                                 DateCreate__week=datetime.now().isocalendar().week).count(),
+                        "total_outgoing_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_TYPE='2',
+                                                                                 DateCreate__year=datetime.now().year,
+                                                                                 DateCreate__week=datetime.now().isocalendar().week).count(),
+                        "total_missed_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='304',
+                                                                               DateCreate__year=datetime.now().year,
+                                                                               DateCreate__week=datetime.now().isocalendar().week).count(),
+
+                        "rejected_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='603',
                                                                            DateCreate__year=datetime.now().year,
                                                                            DateCreate__week=datetime.now().isocalendar().week).count(),
-
-                    "rejected_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='603',
+                        "busy_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='486',
                                                                        DateCreate__year=datetime.now().year,
                                                                        DateCreate__week=datetime.now().isocalendar().week).count(),
-                    "busy_calls_count": callControl.objects.filter(bitrix_staff_id=user, CALL_FAILED_CODE='486',
-                                                                   DateCreate__year=datetime.now().year,
-                                                                   DateCreate__week=datetime.now().isocalendar().week).count(),
-                } for user in users}
-                anlazing_task = {' '.join((user.first_name, user.last_name)): {
-                    "tasks_deferred_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='6',
-                                                                       CREATED_DATE__year=datetime.now().year,
-                                                                       CREATED_DATE__week=datetime.now().isocalendar().week).count(),
-                    "tasks_in_progress_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='3',
-                                                                          CREATED_DATE__year=datetime.now().year,
-                                                                          CREATED_DATE__week=datetime.now().isocalendar().week).count(),
-                    "tasks_needs_rework_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='7',
+                    } for user in users}
+                    anlazing_task = {' '.join((user.first_name, user.last_name)): {
+                        "tasks_deferred_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='6',
                                                                            CREATED_DATE__year=datetime.now().year,
                                                                            CREATED_DATE__week=datetime.now().isocalendar().week).count(),
-                    "tasks_overdue_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='5',
-                                                                      CREATED_DATE__year=datetime.now().year,
-                                                                      CREATED_DATE__week=datetime.now().isocalendar().week).count(),
-
-                    "tasks_newTask_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='1',
-                                                                      CREATED_DATE__year=datetime.now().year,
-                                                                      CREATED_DATE__week=datetime.now().isocalendar().week).count(),
-                    "tasks_waitingTask_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='2',
+                        "tasks_in_progress_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='3',
+                                                                              CREATED_DATE__year=datetime.now().year,
+                                                                              CREATED_DATE__week=datetime.now().isocalendar().week).count(),
+                        "tasks_needs_rework_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='7',
+                                                                               CREATED_DATE__year=datetime.now().year,
+                                                                               CREATED_DATE__week=datetime.now().isocalendar().week).count(),
+                        "tasks_overdue_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='5',
                                                                           CREATED_DATE__year=datetime.now().year,
                                                                           CREATED_DATE__week=datetime.now().isocalendar().week).count(),
-                    "tasks_presumably_completed_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='4',
-                                                                                   CREATED_DATE__year=datetime.now().year,
-                                                                                   CREATED_DATE__week=datetime.now().isocalendar().week).count(),
-                } for user in users}
 
-                anlazing_time = {' '.join((user.first_name, user.last_name)): {
-                    "time": TimeControl.objects.filter(bitrix_staff_id=user, START_TIME__year=datetime.now().year,
-                                                       START_TIME__week=datetime.now().isocalendar().week).values(
-                        'TIME_LEAKS', 'DURATION')
-                } for user in users}
+                        "tasks_newTask_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='1',
+                                                                          CREATED_DATE__year=datetime.now().year,
+                                                                          CREATED_DATE__week=datetime.now().isocalendar().week).count(),
+                        "tasks_waitingTask_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='2',
+                                                                              CREATED_DATE__year=datetime.now().year,
+                                                                              CREATED_DATE__week=datetime.now().isocalendar().week).count(),
+                        "tasks_presumably_completed_count": TaskControl.objects.filter(bitrix_staff_id=user, STATUS='4',
+                                                                                       CREATED_DATE__year=datetime.now().year,
+                                                                                       CREATED_DATE__week=datetime.now().isocalendar().week).count(),
+                    } for user in users}
 
-            print(anlazing_task)
-            print(anlazing_time)
-            print(anlazing_call)
+                    anlazing_time = {' '.join((user.first_name, user.last_name)): {
+                        "time": TimeControl.objects.filter(bitrix_staff_id=user, START_TIME__year=datetime.now().year,
+                                                           START_TIME__week=datetime.now().isocalendar().week).values(
+                            'TIME_LEAKS', 'DURATION')
+                    } for user in users}
 
-            anlazing_task = pd.DataFrame(anlazing_task)
-            anlazing_time = pd.DataFrame(anlazing_time)
-            anlazing_call = pd.DataFrame(anlazing_call)
+                print(anlazing_task)
+                print(anlazing_time)
+                print(anlazing_call)
 
-            prompt = ''
-            staff_id = ''
+                anlazing_task = pd.DataFrame(anlazing_task)
+                anlazing_time = pd.DataFrame(anlazing_time)
+                anlazing_call = pd.DataFrame(anlazing_call)
 
-            if select_departament == "Отдел не выбран":
-                if select_type_staff == "Сотрудник не выбран":
-                    prompt = """
-                    \nВступай в роли бота, который пишет {0} от третьего лица (от лица компании "Эркью") по сотрудникам:{1}.
-                    \nВ отчёте должна содержаться детальная информация **об анализе качества и эффективности работы cотрудников** учитывая все параметры:
-                    \nанализ задач сотрудников:{2}, анализ рабочего времени сотрудников:{3}.
-                    \nДля **нарушения качества работы сотрудников** принимай параметр **количества задач отправленные на доработку больше 2 раз**
-                    \nДля **определния трудовой дисциплины сотрудников** организации принимай параметр: **количество опозданий** и **время рабочее и перерыва**.
-                    \nОтчёт должен содержать заголовки:
-                    \nУспехи:детальная информация о преимуществах работы сотрудников {1} за {0}.
-                    \nОшибки:детальная информация о недостатках работы сотрудников {1} за {0}.
-                    \nОбщий комментарий:выводы по работе сотрудников {1}.
-                    \nВозможные риски:укажи возможные риски эффективности работы сотрудников организации на основе исторических данных:анализ задач сотрудников:{2},
-                    \nанализ рабочего времени сотрудников:{3}.
-                    \nРекомендации по улучшению работы:статьи, книги, документация для прочтения сотрудниками организации {1}.
-                    \nСледуй всем требованиям формирования отчёта контроля качества и эффективности работы сотрудников организации и 
-                    \nпредоставляй **точные числовые значения работы сотруднков**.
-                    \nИнформация должна быть подробно описана в заголовках: Успехи:, Ошибки:, Общий комментарий:, Рекомендации по улучшению работы:, Возможные риски:.
-                    \nФормат вывода заголовков отчёта:
-                    \nУспехи:[сотрудник_1, cотрудник_2 ... сотрудник_N],
-                    \nОшибки:[сотрудник_1, cотрудник_2 ... сотрудник_N],
-                    \nРекомендации по улучшению работы:[сотрудник_1, cотрудник_2 ... сотрудник_N],
-                    \nОбщий комментарий:[сотрудник_1, cотрудник_2 ... сотрудник_N],
-                    \nВозможные риски:[риск_1, риск_2 ... риск_N].\n\n\n
-                    """.format(
-                        select_report_type, customer, anlazing_task, anlazing_time
-                    )
+                prompt = ''
+                staff_id = ''
+
+                if select_departament == "Отдел не выбран":
+                    if select_type_staff == "Сотрудник не выбран":
+                        prompt = """
+                        \nВступай в роли бота, который пишет {0} от третьего лица (от лица компании "Эркью") по сотрудникам:{1}.
+                        \nВ отчёте должна содержаться детальная информация **об анализе качества и эффективности работы cотрудников** учитывая все параметры:
+                        \nанализ задач сотрудников:{2}, анализ рабочего времени сотрудников:{3}.
+                        \nДля **нарушения качества работы сотрудников** принимай параметр **количества задач отправленные на доработку больше 2 раз**
+                        \nДля **определния трудовой дисциплины сотрудников** организации принимай параметр: **количество опозданий** и **время рабочее и перерыва**.
+                        \nОтчёт должен содержать заголовки:
+                        \nУспехи:детальная информация о преимуществах работы сотрудников {1} за {0}.
+                        \nОшибки:детальная информация о недостатках работы сотрудников {1} за {0}.
+                        \nОбщий комментарий:выводы по работе сотрудников {1}.
+                        \nВозможные риски:укажи возможные риски эффективности работы сотрудников организации на основе исторических данных:анализ задач сотрудников:{2},
+                        \nанализ рабочего времени сотрудников:{3}.
+                        \nРекомендации по улучшению работы:статьи, книги, документация для прочтения сотрудниками организации {1}.
+                        \nСледуй всем требованиям формирования отчёта контроля качества и эффективности работы сотрудников организации и 
+                        \nпредоставляй **точные числовые значения работы сотруднков**.
+                        \nИнформация должна быть подробно описана в заголовках: Успехи:, Ошибки:, Общий комментарий:, Рекомендации по улучшению работы:, Возможные риски:.
+                        \nФормат вывода заголовков отчёта:
+                        \nУспехи:[сотрудник_1, cотрудник_2 ... сотрудник_N],
+                        \nОшибки:[сотрудник_1, cотрудник_2 ... сотрудник_N],
+                        \nРекомендации по улучшению работы:[сотрудник_1, cотрудник_2 ... сотрудник_N],
+                        \nОбщий комментарий:[сотрудник_1, cотрудник_2 ... сотрудник_N],
+                        \nВозможные риски:[риск_1, риск_2 ... риск_N].\n\n\n
+                        """.format(
+                            select_report_type, customer, anlazing_task, anlazing_time
+                        )
+                    else:
+                        prompt = """
+                        \nВступай в роли бота, который пишет {0} от третьего лица (от лица компании "Эркью") по сотруднику {1} с должностью {4} в {5}.
+                        \nВ отчёте должна содержаться детальная информация ***об анализе качества и эффективности работы cотрудника** учитывая все параметры:
+                        \nанализ задач сотрудника:{2}, анализ рабочего времени сотрудника:{3}.
+                        \nДля **нарушения качества работы сотрудника** принимай параметр **количества задач отправленные на доработку больше 2 раз**
+                        \nДля **определния трудовой дисциплины сотрудника** организации принимай параметр: **количество опозданий** и **время рабочее и перерыва**.
+                        \nОтчёт должен содержать заголовки:
+                        \nУспехи: детальная информация о преимуществах сотрудника {1} за {0}.
+                        \nОшибки: детальная информация о недостатках работы сотрудника {1} за {0}.
+                        \nОбщий комментарий: выводы по работе сотрудника {1}.
+                        \nРекомендации по улучшению работы:статьи, книги, документация для прочтения сотрудником организации {1}.
+                        \nВозможные риски: укажи возможные риски эффективности работы сотрудника организации на основе исторических данных: анализ задач сотрудника:{2},
+                        \nанализ рабочего времени сотрудника:{3}.
+                        \nСледуй всем требованиям формирования отчёта контроля качества и эффективности работы сотрудников организации и 
+                        \nпредоставляй **точные числовые значения работы сотруднка**.
+                        \nИнформация должна быть подробно описана в заголовках: Успехи:, Ошибки:, Общий комментарий:, Рекомендации по улучшению работы:, Возможные риски:.
+                        \nФормат вывода заголовков отчёта:
+                        \nУспехи:[Успех_1, Успех_2 ... Успех_N],
+                        \nОшибки:[Ошибки_1, Ошибки_2 ... Ошибки_N],
+                        \nРекомендации по улучшению работы:[Рекомендация_1, Рекомендация_2 ... Рекомендация_N],
+                        \nОбщий комментарий:[Общая информация].
+                        \nВозможные риски:[риск_1, риск_2 ... риск_N].\n\n\n
+                        """.format(select_report_type, select_type_staff, anlazing_task, anlazing_time,
+                                   customer.first().get('WORK_POSITION'), customer.first().get('WORK_DEPARTMENT')
+                                   )
+
+                elif select_departament == "Отдел поддержки клиентов":
+                    if select_type_staff == "Сотрудник не выбран":
+                        prompt = """
+                        \nВступай в роли бота, который пишет {0} от третьего лица (от лица компании "Эркью") по сотрудникам отдела поддержки клиентов:{1}.
+                        \nВ отчёте должна содержаться детальная информация **об анализе качества и эффективности работы cотрудников** отдела поддержки клиентов учитывая все параметры:
+                        \nанализ задач сотрудников:{2}, анализ рабочего времени сотрудника:{3}, анализ звонков сотрудников:{4}.
+                        \nДля **нарушения качества работы сотрудников** отдела поддержки клиентов принимай параметры: 
+                        \n**количества задач отправленные на доработку больше 2 раз**, **время звонка меньше 30 секунд и больше 5 минут**.
+                        \nДля **определния трудовой дисциплины сотрудников** организации отдела поддержки клиентов принимай параметр: **количество опозданий** и **время рабочее и перерыва**.
+                        \nОтчёт должен содержать заголовки:
+                        \nУспехи:детальная информация о преимуществах сотрудников {1} за {0}.
+                        \nОшибки:детальная информация о недостатках работы сотрудников {1} за {0}.
+                        \nОбщий комментарий:выводы по работе сотрудников {1}.
+                        \nВозможные риски:укажи возможные риски эффективности работы сотрудников организации на основе исторических данных:анализ задач сотрудников:{2},
+                        \nанализ рабочего времени сотрудников:{3}, анализ звонков сотрудников:{4}.
+                        \nРекомендации по улучшению работы:статьи, книги, документация для прочтения сотрудниками организации {1}.
+                        \nСледуй всем требованиям формирования отчёта контроля качества и эффективности работы сотрудников организации и 
+                        \nпредоставляй **точные числовые значения работы сотруднков**.
+                        \nИнформация должна быть подробно описана в заголовках: Успехи:, Ошибки:, Общий комментарий:, Рекомендации по улучшению работы:, Возможные риски:.
+                        \nФормат вывода заголовков отчёта:
+                        \nУспехи:[сотрудник_1, cотрудник_2 ... сотрудник_N],
+                        \nОшибки:[сотрудник_1, cотрудник_2 ... сотрудник_N],
+                        \nРекомендации по улучшению работы:[сотрудник_1, cотрудник_2 ... сотрудник_N],
+                        \nОбщий комментарий:[сотрудник_1, cотрудник_2 ... сотрудник_N],
+                        \nВозможные риски:[риск_1, риск_2 ... риск_N].\n\n\n
+                        """.format(
+                            select_report_type, customer, anlazing_task, anlazing_time, anlazing_call
+                        )
+                    else:
+                        prompt = """
+                        \nВступай в роли бота, который пишет {0} от третьего лица (от лица компании "Эркью") по сотруднику отдела поддержки клиентов:{1}.
+                        \nВ отчёте должна содержаться детальная информация **об анализе качества и эффективности работы cотрудника** отдела поддержки клиентов учитывая все параметры:
+                        \nанализ задач сотрудника:{2}, анализ рабочего времени сотрудника:{3}, анализ звонков сотрудника:{4}.
+                        \nДля **нарушения качества работы сотрудника** отдела поддержки клиентов принимай параметры: 
+                        \n**количества задач отправленные на доработку больше 2 раз**, **время звонка меньше 30 секунд и больше 5 минут**.
+                        \nДля **определния трудовой дисциплины сотрудника** организации отдела поддержки клиентов принимай параметр: **количество опозданий** и **время рабочее и перерыва**.
+                        \nОтчёт должен содержать заголовки:
+                        \nУспехи:детальная информация о преимуществах сотрудника {1} за {0}.
+                        \nОшибки:детальная информация о недостатках работы сотрудника {1} за {0}.
+                        \nОбщий комментарий:выводы по работе сотрудника {1}.
+                        \nВозможные риски:укажи возможные риски эффективности работы сотрудника организации на основе исторических данных:анализ задач сотрудника:{2},
+                        \nанализ рабочего времени сотрудника:{3}, анализ звонков сотрудника:{4}.
+                        \nРекомендации по улучшению работы сотрудника:статьи, книги, документация для прочтения сотрудником организации {1}.
+                        \nСледуй всем требованиям формирования отчёта контроля качества и эффективности работы сотрудника организации и 
+                        \nпредоставляй **точные числовые значения работы сотруднка**.
+                        \nИнформация должна быть подробно описана в заголовках: Успехи:, Ошибки:, Общий комментарий:, Рекомендации по улучшению работы:, Возможные риски:.
+                        \nФормат вывода заголовков отчёта:
+                        \nУспехи:[Успех_1, Успех_2 ... Успех_N],
+                        \nОшибки:[Ошибки_1, Ошибки_2 ... Ошибки_N],
+                        \nРекомендации по улучшению работы:[Рекомендация_1, Рекомендация_2 ... Рекомендация_N],
+                        \nОбщий комментарий:[Общая информация].
+                        \nВозможные риски:[риск_1, риск_2 ... риск_N].\n\n\n
+                        """.format(
+                            select_report_type, select_type_staff, anlazing_task, anlazing_time, anlazing_call,
+                            customer.first().get('WORK_POSITION'), customer.first().get('WORK_DEPARTMENT')
+                        )
+
+                if select_type_staff != "Сотрудник не выбран":
+                    staff_add = CustomUser.objects.filter(
+                        first_name=first_name,
+                        last_name=last_name,
+                        user_type=2
+                    ).values_list("bitrix_staff_id", flat=True)[0]
+                    staff_id = str(staff_add)
                 else:
-                    prompt = """
-                    \nВступай в роли бота, который пишет {0} от третьего лица (от лица компании "Эркью") по сотруднику {1} с должностью {4} в {5}.
-                    \nВ отчёте должна содержаться детальная информация ***об анализе качества и эффективности работы cотрудника** учитывая все параметры:
-                    \nанализ задач сотрудника:{2}, анализ рабочего времени сотрудника:{3}.
-                    \nДля **нарушения качества работы сотрудника** принимай параметр **количества задач отправленные на доработку больше 2 раз**
-                    \nДля **определния трудовой дисциплины сотрудника** организации принимай параметр: **количество опозданий** и **время рабочее и перерыва**.
-                    \nОтчёт должен содержать заголовки:
-                    \nУспехи: детальная информация о преимуществах сотрудника {1} за {0}.
-                    \nОшибки: детальная информация о недостатках работы сотрудника {1} за {0}.
-                    \nОбщий комментарий: выводы по работе сотрудника {1}.
-                    \nРекомендации по улучшению работы:статьи, книги, документация для прочтения сотрудником организации {1}.
-                    \nВозможные риски: укажи возможные риски эффективности работы сотрудника организации на основе исторических данных: анализ задач сотрудника:{2},
-                    \nанализ рабочего времени сотрудника:{3}.
-                    \nСледуй всем требованиям формирования отчёта контроля качества и эффективности работы сотрудников организации и 
-                    \nпредоставляй **точные числовые значения работы сотруднка**.
-                    \nИнформация должна быть подробно описана в заголовках: Успехи:, Ошибки:, Общий комментарий:, Рекомендации по улучшению работы:, Возможные риски:.
-                    \nФормат вывода заголовков отчёта:
-                    \nУспехи:[Успех_1, Успех_2 ... Успех_N],
-                    \nОшибки:[Ошибки_1, Ошибки_2 ... Ошибки_N],
-                    \nРекомендации по улучшению работы:[Рекомендация_1, Рекомендация_2 ... Рекомендация_N],
-                    \nОбщий комментарий:[Общая информация].
-                    \nВозможные риски:[риск_1, риск_2 ... риск_N].\n\n\n
-                    """.format(select_report_type, select_type_staff, anlazing_task, anlazing_time,
-                               customer.first().get('WORK_POSITION'), customer.first().get('WORK_DEPARTMENT')
-                               )
+                    staff_id = 'Все сотрудники'
 
-            elif select_departament == "Отдел поддержки клиентов":
-                if select_type_staff == "Сотрудник не выбран":
-                    prompt = """
-                    \nВступай в роли бота, который пишет {0} от третьего лица (от лица компании "Эркью") по сотрудникам отдела поддержки клиентов:{1}.
-                    \nВ отчёте должна содержаться детальная информация **об анализе качества и эффективности работы cотрудников** отдела поддержки клиентов учитывая все параметры:
-                    \nанализ задач сотрудников:{2}, анализ рабочего времени сотрудника:{3}, анализ звонков сотрудников:{4}.
-                    \nДля **нарушения качества работы сотрудников** отдела поддержки клиентов принимай параметры: 
-                    \n**количества задач отправленные на доработку больше 2 раз**, **время звонка меньше 30 секунд и больше 5 минут**.
-                    \nДля **определния трудовой дисциплины сотрудников** организации отдела поддержки клиентов принимай параметр: **количество опозданий** и **время рабочее и перерыва**.
-                    \nОтчёт должен содержать заголовки:
-                    \nУспехи:детальная информация о преимуществах сотрудников {1} за {0}.
-                    \nОшибки:детальная информация о недостатках работы сотрудников {1} за {0}.
-                    \nОбщий комментарий:выводы по работе сотрудников {1}.
-                    \nВозможные риски:укажи возможные риски эффективности работы сотрудников организации на основе исторических данных:анализ задач сотрудников:{2},
-                    \nанализ рабочего времени сотрудников:{3}, анализ звонков сотрудников:{4}.
-                    \nРекомендации по улучшению работы:статьи, книги, документация для прочтения сотрудниками организации {1}.
-                    \nСледуй всем требованиям формирования отчёта контроля качества и эффективности работы сотрудников организации и 
-                    \nпредоставляй **точные числовые значения работы сотруднков**.
-                    \nИнформация должна быть подробно описана в заголовках: Успехи:, Ошибки:, Общий комментарий:, Рекомендации по улучшению работы:, Возможные риски:.
-                    \nФормат вывода заголовков отчёта:
-                    \nУспехи:[сотрудник_1, cотрудник_2 ... сотрудник_N],
-                    \nОшибки:[сотрудник_1, cотрудник_2 ... сотрудник_N],
-                    \nРекомендации по улучшению работы:[сотрудник_1, cотрудник_2 ... сотрудник_N],
-                    \nОбщий комментарий:[сотрудник_1, cотрудник_2 ... сотрудник_N],
-                    \nВозможные риски:[риск_1, риск_2 ... риск_N].\n\n\n
-                    """.format(
-                        select_report_type, customer, anlazing_task, anlazing_time, anlazing_call
-                    )
-                else:
-                    prompt = """
-                    \nВступай в роли бота, который пишет {0} от третьего лица (от лица компании "Эркью") по сотруднику отдела поддержки клиентов:{1}.
-                    \nВ отчёте должна содержаться детальная информация **об анализе качества и эффективности работы cотрудника** отдела поддержки клиентов учитывая все параметры:
-                    \nанализ задач сотрудника:{2}, анализ рабочего времени сотрудника:{3}, анализ звонков сотрудника:{4}.
-                    \nДля **нарушения качества работы сотрудника** отдела поддержки клиентов принимай параметры: 
-                    \n**количества задач отправленные на доработку больше 2 раз**, **время звонка меньше 30 секунд и больше 5 минут**.
-                    \nДля **определния трудовой дисциплины сотрудника** организации отдела поддержки клиентов принимай параметр: **количество опозданий** и **время рабочее и перерыва**.
-                    \nОтчёт должен содержать заголовки:
-                    \nУспехи:детальная информация о преимуществах сотрудника {1} за {0}.
-                    \nОшибки:детальная информация о недостатках работы сотрудника {1} за {0}.
-                    \nОбщий комментарий:выводы по работе сотрудника {1}.
-                    \nВозможные риски:укажи возможные риски эффективности работы сотрудника организации на основе исторических данных:анализ задач сотрудника:{2},
-                    \nанализ рабочего времени сотрудника:{3}, анализ звонков сотрудника:{4}.
-                    \nРекомендации по улучшению работы сотрудника:статьи, книги, документация для прочтения сотрудником организации {1}.
-                    \nСледуй всем требованиям формирования отчёта контроля качества и эффективности работы сотрудника организации и 
-                    \nпредоставляй **точные числовые значения работы сотруднка**.
-                    \nИнформация должна быть подробно описана в заголовках: Успехи:, Ошибки:, Общий комментарий:, Рекомендации по улучшению работы:, Возможные риски:.
-                    \nФормат вывода заголовков отчёта:
-                    \nУспехи:[Успех_1, Успех_2 ... Успех_N],
-                    \nОшибки:[Ошибки_1, Ошибки_2 ... Ошибки_N],
-                    \nРекомендации по улучшению работы:[Рекомендация_1, Рекомендация_2 ... Рекомендация_N],
-                    \nОбщий комментарий:[Общая информация].
-                    \nВозможные риски:[риск_1, риск_2 ... риск_N].\n\n\n
-                    """.format(
-                        select_report_type, select_type_staff, anlazing_task, anlazing_time, anlazing_call,
-                        customer.first().get('WORK_POSITION'), customer.first().get('WORK_DEPARTMENT')
-                    )
+                import g4f
+                from g4f.Provider import (
+                    FreeGpt,
+                    FreeChatgpt,
+                    AItianhu,
+                    Aichat,
+                    Bard,
+                    Bing,
+                    ChatBase,
+                    ChatgptAi,
+                    OpenaiChat,
+                    Vercel,
+                    You,
+                    Yqcloud,
+                    HuggingChat,
+                    OpenAssistant,
+                )
 
-            if select_type_staff != "Сотрудник не выбран":
-                staff_add = CustomUser.objects.filter(
-                    first_name=first_name,
-                    last_name=last_name,
-                    user_type=2
-                ).values_list("bitrix_staff_id", flat=True)[0]
-                staff_id = str(staff_add)
+                g4f.debug.logging = True  # enable logging
+                g4f.check_version = False  # Disable automatic version checking
+
+                g4f_request = g4f.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "user", "content": prompt},
+                    ],
+                    provider=g4f.Provider.FreeChatgpt
+                )
+
+                print(g4f_request)
+                description = g4f_request
+                staff = CustomUser.objects.filter(user_type=2)
+
+                import re
+                descriptions = re.sub('', '', description).replace('\n', " ").split('  ')
+                # descriptions = [section.strip() for section in re.sub('', '', description).replace('\n', " ").split('  ') if section.strip()]
+                dict = [line.replace('**', '') for line in descriptions]
+
+                print(dict)
+
+                successes = []
+                errors = []
+                recommendations = []
+                comments = []
+                risks = []
+
+                json_dict = {
+                    "progress": '',
+                    'error': '',
+                    'recommendations': '',
+                    'comment': '',
+                    'risks': ''
+                }
+
+                for i in range(len(dict)):
+                    if dict[i] == 'Успехи:':
+                        successes.append(dict[i + 1].replace('. ', '.\n'))
+                        json_dict['progress'] = '\n'.join(successes)
+                    elif dict[i] == 'Ошибки:':
+                        errors.append(dict[i + 1].replace('. ', '.\n'))
+                        json_dict['error'] = '\n'.join(errors)
+                    elif dict[i] == 'Рекомендации по улучшению работы:':
+                        recommendations.append(dict[i + 1].replace('. ', '.\n'))
+                        json_dict['recommendations'] = '\n'.join(recommendations)
+                    elif dict[i] == 'Общий комментарий:':
+                        comments.append(dict[i + 1].replace('. ', '.\n'))
+                        json_dict['comment'] = '\n'.join(comments)
+                    elif dict[i] == 'Возможные риски:':
+                        risks.append(dict[i + 1].replace('. ', '.\n'))
+                        json_dict['risks'] = '\n'.join(risks)
+
+                print(json_dict)
+
+                context = {
+                    "response": description,
+                    "description": description,
+                    "staff_id": staff_id,
+                    "select_type_staff": select_type_staff,
+                    "select_report_type": select_report_type,
+                    "staff": staff,
+
+                    "progress": json_dict['progress'],
+                    "errors": json_dict['error'],
+                    "recommendations": json_dict['recommendations'],
+                    "comment": json_dict['comment'],
+                    "risks": json_dict['risks'],
+                }
+
+                # messages.success(request, "Вы успешно создали отчёт!")
+                return render(request, 'Hod/report_create.html', context)
             else:
-                staff_id = 'Все сотрудники'
-
-            import g4f
-            from g4f.Provider import (
-                FreeGpt,
-                FreeChatgpt,
-                AItianhu,
-                Aichat,
-                Bard,
-                Bing,
-                ChatBase,
-                ChatgptAi,
-                OpenaiChat,
-                Vercel,
-                You,
-                Yqcloud,
-                HuggingChat,
-                OpenAssistant,
-            )
-
-            g4f.debug.logging = True  # enable logging
-            g4f.check_version = False  # Disable automatic version checking
-
-            g4f_request = g4f.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "user", "content": prompt},
-                ],
-                provider=g4f.Provider.FreeGpt
-            )
-
-            print(g4f_request)
-            description = g4f_request
-            staff = CustomUser.objects.filter(user_type=2)
-
-            import re
-            descriptions = re.sub('', '', description).replace('\n', " ").split('  ')
-            # descriptions = [section.strip() for section in re.sub('', '', description).replace('\n', " ").split('  ') if section.strip()]
-            dict = [line.replace('**', '') for line in descriptions]
-
-            print(dict)
-
-            successes = []
-            errors = []
-            recommendations = []
-            comments = []
-            risks = []
-
-            json_dict = {
-                "progress": '',
-                'error': '',
-                'recommendations': '',
-                'comment': '',
-                'risks': ''
-            }
-
-            for i in range(len(dict)):
-                if dict[i] == 'Успехи:':
-                    successes.append(dict[i + 1].replace('. ', '.\n'))
-                    json_dict['progress'] = '\n'.join(successes)
-                elif dict[i] == 'Ошибки:':
-                    errors.append(dict[i + 1].replace('. ', '.\n'))
-                    json_dict['error'] = '\n'.join(errors)
-                elif dict[i] == 'Рекомендации по улучшению работы:':
-                    recommendations.append(dict[i + 1].replace('. ', '.\n'))
-                    json_dict['recommendations'] = '\n'.join(recommendations)
-                elif dict[i] == 'Общий комментарий:':
-                    comments.append(dict[i + 1].replace('. ', '.\n'))
-                    json_dict['comment'] = '\n'.join(comments)
-                elif dict[i] == 'Возможные риски:':
-                    risks.append(dict[i + 1].replace('. ', '.\n'))
-                    json_dict['risks'] = '\n'.join(risks)
-
-            print(json_dict)
-
-            context = {
-                "response": description,
-                "description": description,
-                "staff_id": staff_id,
-                "select_type_staff": select_type_staff,
-                "select_report_type": select_report_type,
-                "staff": staff,
-
-                "progress": json_dict['progress'],
-                "errors": json_dict['error'],
-                "recommendations": json_dict['recommendations'],
-                "comment": json_dict['comment'],
-                "risks": json_dict['risks'],
-            }
-
-            # messages.success(request, "Вы успешно создали отчёт!")
-            return render(request, 'Hod/report_create.html', context)
+                messages.error(request, "Вы некорректно указали фильтр")
+                return redirect('add_report')
         else:
-            messages.error(request, "Вы некорректно указали фильтр")
-            return redirect('add_report')
-    else:
-        request.session.clear()
-        return render(request, 'Hod/add_report.html', {'conversation': "Не получилось"})
-
+            request.session.clear()
+            return render(request, 'Hod/add_report.html', {'conversation': "Не получилось"})
+    except Exception:
+        messages.error(request, "Повторите ещё раз!")
+        return redirect('add_report')
 
 def create_new_report(request, *args, **kwargs):
     if request.method == 'POST':
