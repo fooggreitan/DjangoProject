@@ -39,7 +39,7 @@ $(document).ready(function() {
 	}
 
 	// Bar chart
-
+	
 	if ($('#bar').length > 0) {
 	var optionsBar = {
 		chart: {
@@ -102,7 +102,7 @@ $(document).ready(function() {
 		}
 
 	}
-
+  
 	var chartBar = new ApexCharts(document.querySelector('#bar'), optionsBar);
 	chartBar.render();
 	}

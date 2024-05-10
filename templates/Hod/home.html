@@ -121,9 +121,9 @@
                         {% for user, data in sorted_analyzing %}
                         <tr>
                             <td>{{ user }}</td>
-                            <td class="text-center">{{ data.call }}</td>
                             <td class="text-center">{{ data.task }}</td>
-                            <td class="text-right">{{ data.time }}</td>
+                            <td class="text-center">{{ data.call }}</td>
+                            <td class="text-right">{{ data.time|floatformat:"0"}} сек</td>
                         </tr>
                         {% endfor %}
                         </tbody>
